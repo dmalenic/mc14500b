@@ -9,7 +9,7 @@ from enum import Enum, auto
 from mc14500util import BYTE_FMT, NIBBLE_FMT, NIBBLE3_FMT, MC14500_VERSION, srec_checksum, cmd_order, valid_depth
 
 # ----------------------------------------------------------------------------------------------------
-# Disassembler of the MC14500 Industrial Control Unit (ICU) that is also called 1 bit processor.
+# Disassembler of the MC14500 Industrial Control Unit (ICU) that is also called 1-bit processor.
 # ----------------------------------------------------------------------------------------------------
 
 # (c) 2009 urs@linurs.org
@@ -92,7 +92,7 @@ def process_srec_file(input_file):
         extracted = srec_line_[-2:]
         return calculated == extracted
 
-    print("Motorola S record file selected")
+    print("Motorola S record file selected.")
 
     with open(input_file, 'r') as handle_srec_file:
         srec_file_content = handle_srec_file.readlines()
@@ -131,7 +131,7 @@ def process_srec_file(input_file):
     old_pc = -1  # dummy value that can not be equal to an unsigned address
     for i in range(len(rom)):
         if rom[i][0] == old_pc:
-            print("Error: More than once data assigned to ROM address: %4.4x" % rom[i][0])
+            print("Error: More than once data assigned to ROM address: %4.4x." % rom[i][0])
             error_counter += 1
         old_pc = rom[i][0]
 
@@ -464,12 +464,12 @@ def mif_match_begin(tokens, line_number):
             case os.linesep:
                 line_number += 1
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting 'BEGIN' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting 'BEGIN' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting 'BEGIN' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting 'BEGIN' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -492,12 +492,12 @@ def mif_match_semicolumn(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ';' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ';' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ';' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ';' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -520,12 +520,12 @@ def mif_match_column(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ':' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ':' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ':' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ':' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -548,12 +548,12 @@ def mif_match_equals(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting '=' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting '=' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting '=' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting '=' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -590,7 +590,7 @@ def mif_match_numerical_value(tokens, radix, line_number):
                     radix_str = 'BIN'
                 case _:
                     radix_str = 'HEX'
-            print(MIF_FILE_ERROR_MSG, line_number, "Expecting", radix_str, "value, found", token)
+            print(MIF_FILE_ERROR_MSG, line_number, "Expecting", radix_str, "value, found", token, '.')
             error_counter += 1
             tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
             break
@@ -609,13 +609,13 @@ def mif_width_value(tokens, line_number):
 
     equals_found, tokens, line_number = mif_match_equals(tokens, line_number)
     if not equals_found:
-        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH value is not defined, defaulting to 8")
+        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH value is not defined, defaulting to 8.")
         error_counter += 1
         return 8, tokens, line_number
 
     width, tokens, line_number = mif_match_numerical_value(tokens, 10, line_number)
     if width not in [8, 12, 16]:
-        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH value", width, "is not in [8, 12, 16], defaulting to 8")
+        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH value", width, "is not in [8, 12, 16], defaulting to 8.")
         error_counter += 1
         width = 8
 
@@ -634,13 +634,13 @@ def mif_depth_value(tokens, line_number):
 
     equals_found, tokens, line_number = mif_match_equals(tokens, line_number)
     if not equals_found:
-        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH value is not defined, defaulting to 256")
+        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH value is not defined, defaulting to 256.")
         error_counter += 1
         return 8, tokens, line_number
 
     depth, tokens, line_number = mif_match_numerical_value(tokens, 10, line_number)
     if not valid_depth(depth):
-        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH value", depth, "is not valid, defaulting to 256")
+        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH value", depth, "is not valid, defaulting to 256.")
         error_counter += 1
         depth = 256
 
@@ -659,7 +659,7 @@ def mif_radix_value(tokens, line_number):
 
     equals_found, tokens, line_number = mif_match_equals(tokens, line_number)
     if not equals_found:
-        print(MIF_FILE_ERROR_MSG, line_number, "RADIX value is not defined, defaulting to HEX")
+        print(MIF_FILE_ERROR_MSG, line_number, "RADIX value is not defined, defaulting to HEX.")
         error_counter += 1
         return 16, tokens, line_number
 
@@ -685,7 +685,7 @@ def mif_radix_value(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "RADIX value", token, "is not valid, defaulting to HEX")
+                print(MIF_FILE_ERROR_MSG, line_number, "RADIX value", token, "is not valid, defaulting to HEX.")
                 error_counter += 1
 
     _, tokens, line_number = mif_match_semicolumn(tokens, line_number)
@@ -703,22 +703,22 @@ def mif_header_consistency_check(header_map, line_number):
 
     header_map[HeaderElem.CORRECT] = True
     if HeaderElem.WIDTH not in header_map:
-        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH missing")
+        print(MIF_FILE_ERROR_MSG, line_number, "WIDTH missing.")
         error_counter += 1
         header_map[HeaderElem.WIDTH] = rom_width
         header_map[HeaderElem.CORRECT] = False
     if HeaderElem.DEPTH not in header_map:
-        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH missing")
+        print(MIF_FILE_ERROR_MSG, line_number, "DEPTH missing.")
         error_counter += 1
         header_map[HeaderElem.DEPTH] = max_rom_depth
         header_map[HeaderElem.CORRECT] = False
     if HeaderElem.ADDRESS_RADIX not in header_map:
-        print(MIF_FILE_ERROR_MSG, line_number, "ADDRESS_RADIX missing")
+        print(MIF_FILE_ERROR_MSG, line_number, "ADDRESS_RADIX missing.")
         error_counter += 1
         header_map[HeaderElem.ADDRESS_RADIX] = 16
         header_map[HeaderElem.CORRECT] = False
     if HeaderElem.DATA_RADIX not in header_map:
-        print(MIF_FILE_ERROR_MSG, line_number, "DATA_RADIX missing")
+        print(MIF_FILE_ERROR_MSG, line_number, "DATA_RADIX missing.")
         error_counter += 1
         header_map[HeaderElem.DATA_RADIX] = 16
         header_map[HeaderElem.CORRECT] = False
@@ -767,12 +767,12 @@ def mif_parse_header(tokens, line_number, header_map):
                 line_number += 1
 
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Unknown header element", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Unknown header element", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return mif_parse_header(tokens, line_number, header_map)
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached without reaching CONTENT")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached without reaching CONTENT.")
     error_counter += 1
     return header_map, tokens, line_number
 
@@ -788,7 +788,7 @@ def mif_parse_end(tokens, line_number):
 
     ok, tokens, line_number = mif_match_semicolumn(tokens, line_number)
     if not ok:
-        print(MIF_FILE_ERROR_MSG, line_number, "Expecting ';' token")
+        print(MIF_FILE_ERROR_MSG, line_number, "Expecting ';' token.")
         error_counter += 1
 
     return ok, tokens, line_number
@@ -813,12 +813,12 @@ def mif_match_double_dots(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting '..' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting '..' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting '..' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting '..' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -842,12 +842,12 @@ def mif_match_closing_bracket(tokens, line_number):
             case os.linesep:
                 continue
             case _:
-                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ']' token, found", token)
+                print(MIF_FILE_ERROR_MSG, line_number, "Expecting ']' token, found", token, '.')
                 error_counter += 1
                 tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
                 return False, tokens, line_number
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ']' token")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached but expecting ']' token.")
     error_counter += 1
     return False, [], line_number
 
@@ -863,7 +863,7 @@ def mif_parse_address_list(tokens, address_radix, line_number):
     global error_counter
     lower_address_bound, tokens, line_number = mif_match_numerical_value(tokens, address_radix, line_number)
     if lower_address_bound is None:
-        print(MIF_FILE_ERROR_MSG, line_number, "Invalid address lower bound")
+        print(MIF_FILE_ERROR_MSG, line_number, "Invalid address lower bound.")
         error_counter += 1
         return False, [], tokens, line_number
     ok, tokens, line_number = mif_match_double_dots(tokens, line_number)
@@ -871,7 +871,7 @@ def mif_parse_address_list(tokens, address_radix, line_number):
         return False, [], tokens, line_number
     upper_address_bound, tokens, line_number = mif_match_numerical_value(tokens, address_radix, line_number)
     if upper_address_bound is None:
-        print(MIF_FILE_ERROR_MSG, line_number, "Invalid address upper bound")
+        print(MIF_FILE_ERROR_MSG, line_number, "Invalid address upper bound.")
         error_counter += 1
         return False, [], tokens, line_number
     ok, tokens, line_number = mif_match_closing_bracket(tokens, line_number)
@@ -981,7 +981,7 @@ def mif_parse_address_value_pair(addresses, values, tokens, line_number):
         for address in addresses:
             rom.append((address, value))
     else:
-        print(MIF_FILE_ERROR_MSG, line_number, "Number of addresses and values do not match")
+        print(MIF_FILE_ERROR_MSG, line_number, "Number of addresses and values do not match.")
         error_counter += 1
         tokens, line_number = mif_consume_till_end_of_line(tokens, line_number)
 
@@ -1019,7 +1019,7 @@ def mif_process_content(tokens, header_map, line_number):
                                                                       line_number)
                 tokens, line_number = mif_parse_address_value_pair(addresses, values, tokens, line_number)
 
-    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached without reaching END")
+    print(MIF_FILE_ERROR_MSG, line_number, "End of file reached without reaching END.")
     error_counter += 1
     return False, tokens, line_number
 
@@ -1032,7 +1032,7 @@ def process_mif_file(input_file):
     """
     global error_counter
 
-    print("Memory Initialization File (MIF) selected")
+    print("Memory Initialization File (MIF) selected.")
 
     # read the file
     with open(input_file, 'r') as handle_mif_file:
@@ -1052,7 +1052,7 @@ def process_mif_file(input_file):
         if not more:
             return error_counter
 
-    print("Error: End of file reached without reaching END")
+    print("Error: End of file reached without reaching END.")
     error_counter += 1
     return error_counter
 
@@ -1073,15 +1073,15 @@ def main():
         description='MC14500 Disassembler',
         add_help=True)
 
-    parser.add_argument('input_file', type=str, help='Input file in srec, hex or bin format')
-    parser.add_argument('-o', '--out', type=str, default='',
-                        help='Output file, default is input file name with .dis extension')
+    parser.add_argument('input_file', type=str, help='input file in srec, hex or bin format')
+    parser.add_argument('-o', '--out', type=str,
+                        help='output file, default is input file name with appended .dis extension')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
-                        help='The width of the ROM in bits (8 or 16), required for hex and bin input file format',
+                        help='the width of the ROM in bits (8, 12 or 16), required for hex and bin input file format',
                         default=8, choices=[8, 12, 16])
-    parser.add_argument('-i', '--instr_position', type=str,
-                        help='Position of INS field in command: first|last, default is last',
+    parser.add_argument('-i', '--instr-position', type=str,
+                        help='position of INS field in a command: first|last, default is last',
                         default='last',
                         choices=['first', 'last'])
 
@@ -1093,10 +1093,10 @@ def main():
     rom_cmd_order = cmd_order['ins_' + ins_pos_str]
 
     print()
-    print("MC14500 Disassembler for the ICU 1 bit processor." + os.linesep +
+    print("MC14500 Disassembler for the ICU 1-bit processor." + os.linesep +
           "Based on the original work of urs@linurs.org." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
-    print("Supported input file formats: Motorola SRECORD in S19-style,")
+    print("Supported input file formats: Motorola S-record in S19-style,")
     print("                              Memory Initialization File (mif),")
     print("                              HEX and raw binary.")
     print("Version " + MC14500_VERSION)
@@ -1104,7 +1104,7 @@ def main():
 
     # get the asm input file
     if not os.access(input_file_name, os.F_OK):
-        print("Disassembler input file not found")
+        print("Disassembler input file not found.")
         exit(1)
 
     input_file_name_words = input_file_name.split('.')
@@ -1121,10 +1121,10 @@ def main():
 
     # get the disassembler input file
     if os.access(output_file_name, os.F_OK):
-        print("Output file exists, overwrite? (y/n)")
+        print("Output file exists, overwrite? (y/n):")
         answer = input()
         if answer != 'y':
-            print("Disassembler aborted")
+            print("Disassembler aborted.")
             exit(1)
 
     # process the input file according to the file extension
@@ -1138,25 +1138,25 @@ def main():
         case "bin":
             process_bin_file(input_file_name)
         case _:
-            print("Error: Unknown file format")
+            print("Error: Unknown file format.")
             print("Note:  File format is determined from the file extension.")
             print("       Supported file formats are: srec, hex, bin.")
             print()
             exit(1)
 
     if error_counter != 0:
-        print("Disassembler failed with", error_counter, " error(s)")
+        print("Disassembler failed with", error_counter, " error(s).")
         exit(1)
 
-    print("Size of assembly:", len(rom), "Locations(s) of", rom_width, "bit(s)")
+    print("Size of assembly:", len(rom), "Locations(s) of", rom_width, "bit(s).")
     error_counter = export_disassembly_file(input_file_name, output_file_name)
 
     if error_counter != 0:
-        print("Disassembler failed with", error_counter, " error(s)")
+        print("Disassembler failed with", error_counter, " error(s).")
         exit(1)
 
-    print("Disassembler succeeded")
-    print("Asm file: ", output_file_name, " created")
+    print("Disassembler succeeded.")
+    print("Asm file: ", output_file_name, " created.")
 
 
 if __name__ == '__main__':

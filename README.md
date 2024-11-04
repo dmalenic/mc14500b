@@ -1,5 +1,7 @@
 # MC14500 Projects
 
+Please, see also `github.io` [docs](https://dmalenic.github.io/mc14500b/).
+
 ## MC14500 Assembler and Disassembler
 
 This project modernizes an old [MC 14500B Assembler and Disasembler](https://www.linurs.org/download/mc14500-0.4.tar.gz) initially written by [Urs Lindegger](https://www.linurs.org/).
@@ -101,7 +103,7 @@ options:
 
 ### mc14500dis.py: The Simple Disassembler for MC14500B MCU
 
-`TODO describbe disassembler usage`
+`TODO describe disassembler usage`
 
 ```bash
 mc14500-asm/examples$ ../mc14500dis.py --help
@@ -124,7 +126,7 @@ options:
 
 ## MC14500 Simulator
 
-This project modernizes another MC14500-related program, also originally written by
+This project modernizes another MC14500-related simulator, also originally written by
 [Urs Lindegger](https://www.linurs.org/), a [MC 14500B Simulator](https://www.linurs.org/index.html).
 
 ### Changes and Additions
@@ -143,12 +145,12 @@ This project modernizes another MC14500-related program, also originally written
 
     - To make the visualization more effective, a selected program can set the simulation clock speed in the fast mode.
 
-    - The selected program can set the timer interval in milliseconds. The maximal timer interval is 100,0000 ms.
+    - The selected program can set the timer interval in milliseconds. The maximal allowed timer interval is 100s (100,000 ms).
 
     - The selected program can output a short description and usage instructions.
 
-- Added support for external lookup table and LIFO ram (to be combined by `JMP`, `NOPO`, `NOPF` and `RET`) instructions to
-  implment `go to` and `subroutine` calls. See `MC14500B Industrial Control Unit Handbook` Chapter 12 Adding Jumps, Conditional Branches, And Subroutines. The link to bitsavers version of the document is provided in [MC14500 Resources](#mc14500-resources) section.
+- Added support for external lookup table and LIFO ram (to be combined by `JMP`, `NOPO`, `NOPF`, and `RET`) instructions to
+  implement `go to` and `subroutine` calls. See `MC14500B Industrial Control Unit Handbook` Chapter 12 Adding Jumps, Conditional Branches, And Subroutines. The link to the _bitsavers_ version of the document is provided in the [MC14500 Resources](#mc14500-resources) section.
 
 ### Simulator Structure
 
@@ -357,7 +359,7 @@ ON position, or the game will pause till you turn it OFF.
 
 - [Assembler](mc14500-asm/examples/killthebit/killthebit.asm)
 
-- [Simmulator](mc14500-sim/programs/killthebit.js)
+- [Simmulator](mc14500-sim/programs/kill_the_bit.js)
 
   ![Kill the bit](mc14500-sim/images/killthebit.png)
 
@@ -427,7 +429,7 @@ or adapted from the programs provided to the original [MC14500B Simulator](https
 
   - [Assembler](mc14500-asm/examples/selftest/selftest.asm),
 
-  - [Simulator](mc14500-sim/programs/selftest.js).
+  - [Simulator](mc14500-sim/programs/self_test.js).
 
 - `JMP` Instruction Demo: This is a simple program that demonstrates, with some addtional hardware, a 16 byte ROM as a lookup  table, it is possible to how to use `JMP` instruction to implement `GOTO` functionality. This sample requires hardware
   modification (see simulator).
@@ -463,13 +465,6 @@ or adapted from the programs provided to the original [MC14500B Simulator](https
   - [Assembler](mc14500-asm/examples/square/square.asm),
 
   - [Simmulator](mc14500-sim/programs/square.js).
-
-- Example RAM Usage: A simple program to illustrate how to use RAM to evaluate a boolean equation:
-  `Z = (A ∧ B) ∨ (C ∧ D)`. It is taken from Urs Lindegger's collection.
-
-  - [Assembler](mc14500-asm/examples/ramtest/ramtest.asm),
-
-  - [Simmulator](mc14500-sim/programs/ramtest.js).
 
 - Unipolar Stepper, Wave Drive: This program drives a unipolar stepper motor using a wave drive.
 

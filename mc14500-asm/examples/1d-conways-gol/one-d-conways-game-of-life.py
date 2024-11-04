@@ -6,7 +6,7 @@ One-dimensional Conway's Game of Life
  * A cell becomes alive if it has exactly one live neighbor.
  * A cell dies if it has zero or two live neighbors.
 
-This is a simulation to help in understanding the rules of the game, and debugging MC14500B implementation
+This is a simulation to help in understanding the rules of the game, and debugging MC14500B implementation.
 """
 
 def next_generation(cells_):

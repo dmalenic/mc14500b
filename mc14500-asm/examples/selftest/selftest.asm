@@ -7,9 +7,8 @@ INIT
 ; ------------------------------------------------------------------------------------------------
 ;  Test: Copy IN0 - IN6 to OUT0 - OUT6
 ;  The user can test all inputs and outputs using the switches and buttons.
-;  Note: OUT0 is not directly the copy of IN0 because IN0 is RR, and it will always be the same,
-;        therefore OUT0 is tested by equation RR == IN2, where RR because of program sequence
-;        holds the same value as IN1
+;  Note: OUT0 is not directly the copy of IN0 because RR is linked to IN0.
+;        Therefore OUT0 follwos the state of RAM0.
 ;        IN7 and OUT7 are lined to the timer and will be tested in the next block
 ; ------------------------------------------------------------------------------------------------
 LD   IN6
@@ -30,9 +29,8 @@ STO  OUT2
 LD   IN1
 STO  OUT1
 
-LD   RR
-XNOR IN2
-STO  OUT0  this is RR == IN2 or effectively IN0 == IN2
+LD   RAM0
+STO  OUT0
 
 ; Test: Start timer TMR0 when elapsed (set 0 -> 1)
 LD   IN7

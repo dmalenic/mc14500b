@@ -795,7 +795,7 @@ def dump_rom_to_byte_array():
 
 def process_srec_s1_record(dump, start, length, handle_srec_file, srec_addr_fmt, srec_len_fmt, srec_data_fmt):
     """
-    Processes a srec S1 record
+    Processes a srec S1 record.
     :param dump:
     :param start:
     :param length:
@@ -814,7 +814,7 @@ def process_srec_s1_record(dump, start, length, handle_srec_file, srec_addr_fmt,
 
 def export_memory_dump_to_srec_file(outfile, memory_dump):
     """
-    Exports the assembled data to a srec file
+    Exports the assembled data to a srec file.
     :param outfile:
     :param memory_dump:
     :return: None
@@ -866,7 +866,7 @@ def export_memory_dump_to_srec_file(outfile, memory_dump):
 
 def export_to_srec_file(asm_file_name):
     """
-    Exports the assembled data to a srec file
+    Exports the assembled data to a srec file.
     :param asm_file_name:
     :return: None
     """
@@ -886,7 +886,7 @@ def export_to_srec_file(asm_file_name):
 
 def export_to_hex_file(asm_file_name):
     """
-    Export the assembled data to a hex file
+    Export the assembled data to a hex file.
     :param asm_file_name:
     :return: None
     """
@@ -907,7 +907,7 @@ def export_to_hex_file(asm_file_name):
 
 def export_to_raw_binary_file(asm_file_name):
     """
-    Export the assembled data to a hex file
+    Export the assembled data to a hex file.
     :param asm_file_name:
     :return: None
     """
@@ -928,7 +928,7 @@ def export_to_raw_binary_file(asm_file_name):
 
 def output_file_name(asm_file_name, file_extension):
     """
-    Creates the output file name, based on provide input assembler file name and the provided output file extension
+    Creates the output file name, based on provide input assembler file name and the provided output file extension.
     :param asm_file_name:
     :param file_extension:
     :return: output file name
@@ -953,34 +953,34 @@ def main():
 
     parser = argparse.ArgumentParser(
         usage='%(prog)s [-v] [-h] [-s] [-x] [-b] [-w width] [-d depth] [-I include_directory] [-i instr_position] '
-              '[-n non_programmed_location_value] asm_file',
+              '[-n non_programmed_location_value] input_file',
         description='MC14500 Assembler',
         add_help=True)
 
-    parser.add_argument('asm_file', type=str, help='The assembler file to be processed')
+    parser.add_argument('input_file', type=str, help='the input assembler file to be processed')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
-                        help='The width of the ROM in bits (8, 12 or 16)', default=8, choices=[8, 12, 16])
+                        help='the width of the ROM in bits (8, 12 or 16)', default=8, choices=[8, 12, 16])
     parser.add_argument('-d', '--depth', type=int,
-                        help='The depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to'
+                        help='the depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to'
                              ' and including 65536',
                         default=256)
-    parser.add_argument('-i', '--instr_position', type=str,
-                        help='Position of INS field in a command: first|last, default is last',
+    parser.add_argument('-i', '--instr-position', type=str,
+                        help='the position of INS field in a command: first|last, default is last',
                         default='last',
                         choices=['first', 'last'])
-    parser.add_argument('-I', '--include', type=str, default='',
-                        help='An additonal directory to look for include files beside the current working directory')
-    parser.add_argument('-s', '--srec', action='store_true', help='Generate Motorola S record file')
-    parser.add_argument('-x', '--hex', action='store_true', help='Generate HEX file')
-    parser.add_argument('-b', '--binary', action='store_true', help='Generate faw binary file')
-    parser.add_argument("-n", "--non_programmed_location_value", type=str, default="0",
-                        help='The value that is expected to be present in ROM locations that are not part of program',
+    parser.add_argument('-I', '--include', type=str,
+                        help='an additonal directory to look for include files beside the current working directory')
+    parser.add_argument('-s', '--srec', action='store_true', help='generate Motorola S-record file')
+    parser.add_argument('-x', '--hex', action='store_true', help='generate HEX file')
+    parser.add_argument('-b', '--binary', action='store_true', help='generate raw binary file')
+    parser.add_argument("-n", "--non-programmed-location-value", type=str, default="0",
+                        help='the value that is expected to be present in ROM locations that are not part of program',
                         choices=['0', 'F'])
 
     args = parser.parse_args()
 
-    asm_file_name = args.asm_file
+    asm_file_name = args.input_file
     rom_width = args.width
     max_rom_depth = args.depth
     ins_pos_str = args.instr_position
@@ -995,7 +995,7 @@ def main():
         non_programmed_location_value = 0xFFFF & ((1 << rom_width) - 1)
 
     print()
-    print("MC14500 Assembler for the ICU 1 bit processor." + os.linesep +
+    print("MC14500 Assembler for the ICU 1-bit processor." + os.linesep +
           "Based on the original work of urs@linurs.org." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
     print("Version " + MC14500_VERSION)

@@ -4,9 +4,9 @@ import {pgmInitCurrentProgram} from '../programs.js';
 export function initSelfTest(programSelector) {
     pgmInitCurrentProgram(programSelector, `Self Test`,
         `A simple program to exercise different parts of the emulator.<br/>
-        The state of inputs IN1 to IN6 is mirrored to outputs OUT0 to OUT6.<br/>
-        The output OUT0 is ON if input RAM0 is ON and OFF otherwise.<br/>
-        Timer controls running light in ROM0 to ROM8<br/>
+        The state of inputs 1 to 6 is mirrored to outputs 1 to 6.<br/>
+        The output 0 follows the state of ram 0.<br/>
+        Timer controls running light in ram 0 to 7.<br/>
         &nbsp;`,
         rom, 0, 250);
 }
@@ -43,7 +43,7 @@ const rom = [
     0x18,   // STO  OUT1
 
     0x81,   // LD   RAM0
-    0x08,   // STO  OUT0  this is RR == IN2 or effectively IN0 == IN2
+    0x08,   // STO  OUT0
 
     // ; Test: Start timer TMR0 when elapsed (set 0 -> 1)
     0x71,   // LD   IN7

@@ -4,9 +4,9 @@ import {pgmInitCurrentProgram} from '../programs.js';
 export function initKillTheBit(programSelector) {
     pgmInitCurrentProgram(programSelector, `Kill the bit`,
         `The port of Kill the Bit game for Altair by Dean McDaniel, May 15, 1975.<br/>
-        Kill the rotating bit (OUT1-OUT6). If you miss the lit bit, another bit turns on, leaving<br/>
-        &nbsp;two bits to destroy.<br/>
-        Quickly toggle the correct switch (IN1-IN6) on and off at the right moment.<br/>
+        Kill the rotating bit (outputs 1 to 6). If you miss the lit bit, another bit turns on,<br/>
+        &nbsp;leaving two bits to destroy.<br/>
+        Quickly toggle the correct switch (inputs 1 to 6) on and off at the right moment.<br/>
         Don't leave the switch in the on position, or the game will pause.`,
         rom, 0, 350);
 }
