@@ -1,0 +1,1577 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
+    <meta content="Unknown" name="author"/>
+    <title>MC14500B Simulator</title>
+    <link href="favicon.ico" rel="icon" type="image/x-icon"/>
+    <link href="mc14500.css" rel="stylesheet" type="text/css"/>
+
+    <script type="module" src="./mc14500.js"></script>
+    <script type="module" src="./programs.js"></script>
+    <script type="module" src="./programs/1_bit_jk_flip_flop.js"></script>
+    <script type="module" src="./programs/1_bit_sr_latch.js"></script>
+    <script type="module" src="./programs/1d_conways_gol.js"></script>
+    <script type="module" src="./programs/4_bit_adder.js"></script>
+    <script type="module" src="./programs/4_bit_comparator.js"></script>
+    <script type="module" src="./programs/4_bit_counter.js"></script>
+    <script type="module" src="./programs/4_bit_d_flip_flop.js"></script>
+    <script type="module" src="./programs/4_bit_d_latch.js"></script>
+    <script type="module" src="./programs/8_bit_lfsr.js"></script>
+    <script type="module" src="./programs/and.js"></script>
+    <script type="module" src="./programs/ien_oen.js"></script>
+    <script type="module" src="./programs/jmp.js"></script>
+    <script type="module" src="./programs/killthebit.js"></script>
+    <script type="module" src="./programs/nand.js"></script>
+    <script type="module" src="./programs/nor.js"></script>
+    <script type="module" src="./programs/not.js"></script>
+    <script type="module" src="./programs/or.js"></script>
+    <script type="module" src="./programs/ramtest.js"></script>
+    <script type="module" src="./programs/roll_a_die.js"></script>
+    <script type="module" src="./programs/rtn_nopf.js"></script>
+    <script type="module" src="./programs/rtn_nopo.js"></script>
+    <script type="module" src="./programs/running_lights.js"></script>
+    <script type="module" src="./programs/selftest.js"></script>
+    <script type="module" src="./programs/stepper_cw_full_step.js"></script>
+    <script type="module" src="./programs/stepper_cw_half_step.js"></script>
+    <script type="module" src="./programs/stepper_cw_wave.js"></script>
+    <script type="module" src="./programs/xnor.js"></script>
+    <script type="module" src="./programs/xor.js"></script>
+    <script type="module">
+        import {
+            mc14500Reset,
+            mc14500Run,
+            mc14500Speed,
+            mc14500StepDown,
+            mc14500StepUp,
+            mc14500ToggleInput
+        } from './mc14500.js';
+        import {pgmInjectProgramSelection} from './programs.js';
+
+        window.mc14500ToggleInput = mc14500ToggleInput;
+        window.mc14500StepUp = mc14500StepUp;
+        window.mc14500StepDown = mc14500StepDown;
+        window.mc14500Run = mc14500Run;
+        window.mc14500Speed = mc14500Speed;
+        window.mc14500Reset = mc14500Reset;
+        window.pgmInjectProgramSelection = pgmInjectProgramSelection;
+    </script>
+
+</head>
+<body onload="pgmInjectProgramSelection()">
+<div class="content" id="content">
+    <h1>MC14500B 1-bit ICU Simulator</h1>
+    <p>The MC14500B Industrial Control Unit (ICU) is a single–bit CMOS processor.</p>
+    <h2>Program:&nbsp;<span id="program-name"></span></h2>
+
+    <br/>
+
+    <svg
+            height="630px"
+            id="svg-simulator-main"
+            viewBox="0 0 640 630"
+            width="640px"
+            xmlns="http://www.w3.org/2000/svg">
+        <defs
+                id="defs2">
+            <marker
+                    id="m-x1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-x1"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-rtn"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-rtn"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-flag-o"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-flag-o"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-push-flag-o-1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-push-flag-o-1"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-flag-f"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-flag-f"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-push-flag-f-1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-push-flag-f-1"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-jmp"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-jmp"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-clear"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-clear"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-set"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-set"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-set-lkp"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-lut-lkp"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-set-d-rdy"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-lut-d-rdy"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-rst"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-rst"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-rst-1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-rst-1"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-rr"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-rr"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output7"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output7"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output6"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output6"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output5"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output5"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output4"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output4"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output3"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output3"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output2"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output1"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-output0"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-output0"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input6"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input6"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input5"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input5"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input4"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input4"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input3"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input3"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input2"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input1"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-input7"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-input7"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-inverter"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-inverter"
+                        r="3"
+                        style="fill:#000000;fill-rule:evenodd;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-write"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-write"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-write-1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-write-1"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-read"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <path
+                        d="M 0,0 L -15,-5 L -11,0 L -15,5 Z"
+                        id="mp-read"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+            <marker
+                    id="m-read-1"
+                    orient="auto"
+                    refX="0"
+                    refY="0"
+                    style="overflow:visible">
+                <circle
+                        cx="0"
+                        cy="0"
+                        id="mp-read-1"
+                        r="2"
+                        style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            </marker>
+        </defs>
+        <g
+                id="simulator">
+            <rect
+                    height="618"
+                    id="rect-background-panel"
+                    style="fill:#0db700;fill-opacity:0.25;stroke-width:1;stroke-opacity:1"
+                    width="640"
+                    x="0"
+                    y="44"/>
+            <rect
+                    height="44"
+                    id="rect-tmr0"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1;image-rendering:auto"
+                    width="169"
+                    x="220"
+                    y="0"/>
+            <text
+                    id="text-tmr0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-size:1.4em;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="264"
+                    y="31">Timer:
+            </text>
+            <text
+                    id="tmr0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;font-size:1.4em;font-family:sans-serif;text-align:left;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#ffffff"
+                    x="306"
+                    y="31">0
+            </text>
+            <path
+                    d="m 404,344 v -108 h -320 v -77"
+                    id="write"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-write)"/>
+            <path
+                    d="m 273,236 v -77"
+                    id="write-1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-write);marker-start:url(#m-write-1)"/>
+            <path
+                    d="m 404,236 h 90"
+                    id="write-2"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-write-1)"/>
+            <path
+                    d="m 494,236 v -10 l 16 10 l -16 10 z"
+                    id="inverter"
+                    style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            <path
+                    d="m 514,236 z"
+                    id="inverter-circle"
+                    style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-inverter)"/>
+            <path
+                    d="m 518,236 h 12 v -77"
+                    id="read"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-read)"/>
+            <path
+                    d="m 530,188 h -156 v -29"
+                    id="read-1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-read);marker-start:url(#m-read-1)"/>
+
+            <path
+                    d="m 560,343 l 21,-21 h -10 v -164 h -22 v 94 h -297 v -72 h 10 l -21,-21 l -21,21 h 10 v 72 h -168 v -72 h 10 l -21,-21 l -21,21 h 10 v 94 h 509 v 48 h -10 z"
+                    id="data-bus"
+                    style="fill:#ebb655;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <path
+                    d="m 116,343 v -163 h -21 l 42,-21 l 42,21 h -21 v 16 h 146 v -16 h -21 l 42,-21 l 42,21 h -21 v 16 h 102 v -16 h -21 l 42,-21 l 42,21 h -21 v 40 h -332 v 66 h 332 v 36 h 21 l -42,21 l -42,-21 h 21 v -12 h -252 v 33 z"
+                    id="instruction-bus"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <path
+                    d="m 156,418 l -62,21 h 22 v 60 h 80 v -60 h 22 z"
+                    id="address-bus"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <text
+                    id="t-write"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="344"
+                    y="340">Write
+            </text>
+            <text
+                    id="data"
+                    style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="480"
+                    y="268">X
+            </text>
+            <text
+                    id="data-bus-msg"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="252"
+                    y="268">1 bit bi-directional data bus:
+            </text>
+            <text
+                    id="pc"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="140"
+                    y="480">0
+            </text>
+            <text
+                    id="command"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="140"
+                    y="328">0
+            </text>
+            <text
+                    id="inst"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="252"
+                    y="304">0
+            </text>
+            <text
+                    id="opcode"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="292"
+                    y="304">X
+            </text>
+            <text
+                    id="io-address"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="252"
+                    y="214">0
+            </text>
+            <path
+                    d="m 32,22 v -12 h 186"
+                    id="output7"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output7)"/>
+            <path
+                    d="m 32,86 v -40"
+                    id="output7-1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;"/>
+            <path
+                    d="m 52,86 v -40"
+                    id="output6"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output6)"/>
+            <path
+                    d="m 74,86 v -40"
+                    id="output5"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output5)"/>
+            <path
+                    d="m 95,86 v -40"
+                    id="output4"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output4)"/>
+            <path
+                    d="m 116,86 v -40"
+                    id="output3"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output3)"/>
+            <path
+                    d="m 136.5,86 v -40"
+                    id="output2"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output2)"/>
+            <path
+                    d="m 158,86 v -40"
+                    id="output1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output1)"/>
+            <path
+                    d="m 179,86 v -40"
+                    id="output0"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-output0)"/>
+            <text
+                    id="t-output7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="26"
+                    y="42">7
+            </text>
+            <text
+                    id="t-output6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="45"
+                    y="42">6
+            </text>
+            <text
+                    id="t-output5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="68"
+                    y="42">5
+            </text>
+            <text
+                    id="t-output4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="88"
+                    y="42">4
+            </text>
+            <text
+                    id="t-output3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="110"
+                    y="42">3
+            </text>
+            <text
+                    id="t-output2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="130"
+                    y="42">2
+            </text>
+            <text
+                    id="t-output1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="151"
+                    y="42">1
+            </text>
+            <text
+                    id="t-output0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="173"
+                    y="42">0
+            </text>
+            <path
+                    d="m 390,10 h 44 v 12"
+                    id="input7-1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            <path
+                    d="m 434,44 v 40"
+                    id="input7"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input7)"/>
+            <path
+                    d="m 456,44 v 40"
+                    id="input6"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input6)"/>
+            <path
+                    d="m 477,44 v 40"
+                    id="input5"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input5)"/>
+            <path
+                    d="m 499,44 v 40"
+                    id="input4"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input4)"/>
+            <path
+                    d="m 520,44 v 40"
+                    id="input3"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input3)"/>
+            <path
+                    d="m 541,44 v 40"
+                    id="input2"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input2)"/>
+            <path
+                    d="m 562,44 v 40"
+                    id="input1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-input1)"/>
+            <text
+                    class="t-input"
+                    id="t-input7"
+                    onclick="mc14500ToggleInput(7)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="428"
+                    y="42">7
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input6"
+                    onclick="mc14500ToggleInput(6)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="449"
+                    y="42">6
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input5"
+                    onclick="mc14500ToggleInput(5)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="471"
+                    y="42">5
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input4"
+                    onclick="mc14500ToggleInput(4)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="491"
+                    y="42">4
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input3"
+                    onclick="mc14500ToggleInput(3)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="513"
+                    y="42">3
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input2"
+                    onclick="mc14500ToggleInput(2)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="534"
+                    y="42">2
+            </text>
+            <text
+                    class="t-input"
+                    id="t-input1"
+                    onclick="mc14500ToggleInput(1)"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="555"
+                    y="42">1
+            </text>
+            <text
+                    id="t-rr"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="580"
+                    y="42">RR
+            </text>
+            <rect
+                    height="72"
+                    id="rect-output"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="169"
+                    x="21"
+                    y="86"/>
+            <rect
+                    height="72"
+                    id="rect-input"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="169"
+                    x="424"
+                    y="86"/>
+            <rect
+                    height="88"
+                    id="rect-ram"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="169"
+                    x="220"
+                    y="70"/>
+            <text
+                    id="output"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="56"
+                    y="132">Output
+            </text>
+            <text
+                    id="input"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="468"
+                    y="132">Input
+            </text>
+            <text
+                    id="txt-ram"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="272"
+                    y="132">RAM
+            </text>
+            <text
+                    id="t-ram7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="236"
+                    y="92">7
+            </text>
+            <text
+                    id="t-ram6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="256"
+                    y="92">6
+            </text>
+            <text
+                    id="t-ram5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="276"
+                    y="92">5
+            </text>
+            <text
+                    id="t-ram4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="296"
+                    y="92">4
+            </text>
+            <text
+                    id="t-ram3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="316"
+                    y="92">3
+            </text>
+            <text
+                    id="t-ram2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="336"
+                    y="92">2
+            </text>
+            <text
+                    id="t-ram1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="356"
+                    y="92">1
+            </text>
+            <text
+                    id="t-ram0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="372"
+                    y="92">0
+            </text>
+            <rect
+                    height="72"
+                    id="rect-program-memory"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="274"
+                    x="21"
+                    y="344"/>
+            <rect
+                    height="72"
+                    id="rect-mc14500"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="274"
+                    x="318"
+                    y="344"/>
+            <rect
+                    height="72"
+                    id="rect-program-counter"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="274"
+                    x="21"
+                    y="500"/>
+            <text
+                    id="program-mem"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="36"
+                    y="392">Program Memory
+            </text>
+            <text
+                    id="mc14500"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="344"
+                    y="392">MC14500B
+            </text>
+            <text
+                    id="program-counter"
+                    style="font-style:normal;font-weight:normal;font-size:1.8em;line-height:125%;font-family:sans-serif;letter-spacing:0;word-spacing:0;fill:#ffffff"
+                    x="36"
+                    y="546">Program Counter
+            </text>
+            <text
+                    id="t-ien"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#ff0000"
+                    x="536"
+                    y="364">IEN
+            </text>
+            <text
+                    id="t-skip"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#ff0000"
+                    x="536"
+                    y="388">SKIP
+            </text>
+            <text
+                    id="t-oen"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#ff0000"
+                    x="536"
+                    y="412">OEN
+            </text>
+            <text
+                    id="t-rr1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="443">RR
+            </text>
+            <path
+                    d="m 404,417 v 97 h -108"
+                    id="x1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-x1)"/>
+            <text
+                    id="t-x1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="328"
+                    y="512">X1 clk
+            </text>
+            <path
+                    d="m 424,417 v 163 h 15 c 0 -5 10 -5 10 0 h 190"
+                    id="jmp"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-jmp)"/>
+            <path
+                    d="m 424,536 h -128"
+                    id="clear"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-clear);marker-end:url(#m-jmp)"/>
+            <text
+                    id="t-clear"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="328"
+                    y="534">clear
+            </text>
+            <text
+                    id="t-jmp"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="578">JMP
+            </text>
+            <path
+                    d="m 529,417 v29 h 85 v -401 h -32 v 39"
+                    id="rr"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rr)"/>
+            <path
+                    d="m 508,417 v 97 h 131"
+                    id="flag-f"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-flag-f)"/>
+            <text
+                    id="t-flag-f"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="512">FlagF
+            </text>
+            <path
+                    d="m 487,417 v 119 h 152"
+                    id="flag-o"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-flag-o)"/>
+            <text
+                    id="t-flag-o"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="534">FlagO
+            </text>
+            <path
+                    d="m 466,417 v 141 h 173"
+                    id="rtn"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rtn)"/>
+            <text
+                    id="t-rtn"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="556">RTN
+            </text>
+            <path
+                    d="m 640,602 h -236 v -46 h -108"
+                    id="set-pc"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-set)"/>
+            <text
+                    id="t-set-pc"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="328"
+                    y="554">set
+            </text>
+            <path
+                    d="m 640,624 h -196 v -207"
+                    id="rst"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rst)"/>
+            <path
+                    d="m 444,624 h -192 v -51"
+                    id="rst-1"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-rst-1);marker-end:url(#m-rst)"/>
+            <text
+                    id="t-rst"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="540"
+                    y="622">RST
+            </text>
+            <path
+                    d="m 490,196 v 24 h 134 v 12 l 16,-24 l -16,-24 v 12 z"
+                    id="instruction-bus-ext"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1;display:none"/>
+            <path
+                    d="m 196,460 v 24 h 428v 12 l 16,-24 l -16,-24 v 12 z"
+                    id="address-bus-push"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1;display:none"/>
+            <path
+                    d="m 156,574 l -62,21 h 22 v 78 h 524 v -24 h -444 v -54 h 22 z"
+                    id="address-bus-pop"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1;display:none"/>
+            <text
+                    id="pc-set-addr"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#000000;display:none"
+                    x="156"
+                    y="620">0x00
+            </text>
+        </g>
+        <g
+                id="deluxe-extension"
+                style="display:none">
+            <rect
+                    height="648"
+                    id="rect-background-panel-deluxe"
+                    style="fill:#0db700;fill-opacity:0.25;stroke-width:1;stroke-opacity:1"
+                    width="359"
+                    x="641"
+                    y="44"/>
+            <path
+                    d="m 641,196 h 291 v 32 h 12 l -24,16 l -24,-16 h 12 v -8 h -267 z"
+                    id="instruction-bus-deluxe-in"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <text
+                    id="io-address-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#000000;"
+                    x="700"
+                    y="214">0x00
+            </text>
+            <rect
+                    height="190"
+                    id="rect-lifo-deluxe"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="120"
+                    x="660"
+                    y="245"/>
+            <text
+                    id="t-lifo-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.2em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="720"
+                    y="264">LIFO
+            </text>
+            <text
+                    id="t-lifo-deluxe-key0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="428">0
+            </text>
+            <text
+                    id="t-lifo-deluxe-key1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="428">1
+            </text>
+            <text
+                    id="t-lifo-deluxe-key2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="408">2
+            </text>
+            <text
+                    id="t-lifo-deluxe-key3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="408">3
+            </text>
+            <text
+                    id="t-lifo-deluxe-key4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="388">4
+            </text>
+            <text
+                    id="t-lifo-deluxe-key5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="388">5
+            </text>
+            <text
+                    id="t-lifo-deluxe-key6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="368">6
+            </text>
+            <text
+                    id="t-lifo-deluxe-key7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="368">7
+            </text>
+            <text
+                    id="t-lifo-deluxe-key8"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="348">8
+            </text>
+            <text
+                    id="t-lifo-deluxe-key9"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="348">9
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyA"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="328">A
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyB"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="328">B
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyC"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="308">C
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyD"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="308">D
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyE"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="670"
+                    y="288">E
+            </text>
+            <text
+                    id="t-lifo-deluxe-keyF"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="730"
+                    y="288">F
+            </text>
+            <text
+                    id="t-lifo-deluxe-val0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="428">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="428">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="408">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="408">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="388">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="388">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="368">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="368">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val8"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="348">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-val9"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="348">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valA"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="328">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valB"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="328">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valC"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="308">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valD"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="308">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valE"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="700"
+                    y="288">0x00
+            </text>
+            <text
+                    id="t-lifo-deluxe-valF"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="760"
+                    y="288">0x00
+            </text>
+            <rect
+                    height="190"
+                    id="rect-lut-deluxe"
+                    style="fill:#000000;stroke:#000000;stroke-width:1;stroke-opacity:1"
+                    width="120"
+                    x="860"
+                    y="245"/>
+            <text
+                    id="t-lut-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.2em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="920"
+                    y="264">LUT
+            </text>
+            <text
+                    id="t-lut-deluxe-key0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="428">0
+            </text>
+            <text
+                    id="t-lut-deluxe-key1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="428">1
+            </text>
+            <text
+                    id="t-lut-deluxe-key2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="408">2
+            </text>
+            <text
+                    id="t-lut-deluxe-key3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="408">3
+            </text>
+            <text
+                    id="t-lut-deluxe-key4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="388">4
+            </text>
+            <text
+                    id="t-lut-deluxe-key5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="388">5
+            </text>
+            <text
+                    id="t-lut-deluxe-key6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="368">6
+            </text>
+            <text
+                    id="t-lut-deluxe-key7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="368">7
+            </text>
+            <text
+                    id="t-lut-deluxe-key8"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="348">8
+            </text>
+            <text
+                    id="t-lut-deluxe-key9"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="348">9
+            </text>
+            <text
+                    id="t-lut-deluxe-keyA"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="328">A
+            </text>
+            <text
+                    id="t-lut-deluxe-keyB"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="328">B
+            </text>
+            <text
+                    id="t-lut-deluxe-keyC"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="308">C
+            </text>
+            <text
+                    id="t-lut-deluxe-keyD"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="308">D
+            </text>
+            <text
+                    id="t-lut-deluxe-keyE"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="870"
+                    y="288">E
+            </text>
+            <text
+                    id="t-lut-deluxe-keyF"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="930"
+                    y="288">F
+            </text>
+            <text
+                    id="t-lut-deluxe-val0"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="428">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val1"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="428">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val2"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="408">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val3"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="408">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val4"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="388">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val5"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="388">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val6"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="368">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val7"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="368">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val8"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="348">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-val9"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="348">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valA"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="328">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valB"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="328">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valC"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="308">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valD"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="308">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valE"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="900"
+                    y="288">0x00
+            </text>
+            <text
+                    id="t-lut-deluxe-valF"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#ffffff"
+                    x="960"
+                    y="288">0x00
+            </text>
+            <path
+                    d="m 641,514 h 72 v -78"
+                    id="push-flag-f-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-flag-f)"/>
+            <path
+                    d="m 713,514 h 9 c 0 -5 10 -5 10 0 h 35 c 0 -5 10 -5 10 0 h 24 v 34 h 14 c 0 -5 10 -5 10 0 h 26"
+                    id="push-flag-f-1-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-push-flag-f-1);marker-end:url(#m-flag-f)"/>
+            <text
+                    id="t-push-flag-f-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="646"
+                    y="512">push
+            </text>
+            <path
+                    d="m 641,536 h 72 v -100"
+                    id="push-flag-o-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-flag-o)"/>
+            <path
+                    d="m 713,536 h 9 c 0 -5 10 -5 10 0 h 35 c 0 -5 10 -5 10 0 h 24 v 12 h 14 c 0 -5 10 -5 10 0 h 26 "
+                    id="push-flag-o-1-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-push-flag-o-1);marker-end:url(#m-flag-o)"/>
+            <text
+                    id="t-push-flag-o-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="646"
+                    y="534">push
+            </text>
+            <path
+                    d="m 641,558 h 86 v -122"
+                    id="pop-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rtn)"/>
+            <text
+                    id="t-pop-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="646"
+                    y="556">pop
+            </text>
+            <path
+                    d="m 641,580 h 126 c 0 -5 10 -5 10 0 h 38 c 0 -5 10 -5 10 0 h 72 v -144"
+                    id="jmp-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-jmp)"/>
+            <path
+                    d="m 641,580 h 126 c 0 -5 10 -5 10 0 h 24 v -12 h 14 c 0 -5 10 -5 10 0 h 26"
+                    id="lookup-in-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-jmp)"/>
+            <text
+                    id="t-lookup-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="646"
+                    y="578">lookup
+            </text>
+            <path
+                    d="m 848,574 q 12 -16 0 -32 q 48 16 0 32 z"
+                    id="lut-lookup-or-deluxe"
+                    style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            <path
+                    d="m 870,558 h 27 v -122"
+                    id="lut-lookup-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-set-lkp)"/>
+            <path
+                    d="m 780 400 h 30 v 52 "
+                    id="lifo-data-rdy-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rtn)"/>
+            <path
+                    d="m 860 400 h -30 v 52 "
+                    id="lut-data-rdy-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-set-d-rdy)"/>
+            <path
+                    d="m 804,450 q 16 12 32 0 q -16 48 -32 0 z"
+                    id="data-rdy-or-deluxe"
+                    style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1"/>
+            <path
+                    d="m 820,472 v 130 h -179"
+                    id="addr-set-rdy-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-set)"/>
+            <path
+                    d="m 1000,624 h -359"
+                    id="rst-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-end:url(#m-rst)"/>
+            <path
+                    d="m 772,624 v -188"
+                    id="rst-lifo-deluxe"
+                    style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1;stroke-opacity:1;marker-start:url(#m-rst-1);marker-end:url(#m-rst)"/>
+            <text
+                    id="t-rst-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.4em;line-height:125%;font-family:sans-serif;text-align:start;letter-spacing:0;word-spacing:0;text-anchor:start;fill:#000000"
+                    x="958"
+                    y="622">RST
+            </text>
+            <path
+                    d="m 641,460 h 29 v -8 h -12 l 24,-16 l 24,16 h -12 v 32 h -53 z"
+                    id="address-bus-deluxe-push"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <path
+                    d="m 641,661 l 16,24 v -12 h 287 v -24 h -24 l 24,-16 h -12 v -197 h -24 v 197 h -12 l 24,16 h -171 l 24,-16 h -12 v -197 h -24 v 197 h -12 l 24,16 h -92 v -12 z"
+                    id="address-bus-deluxe-pop"
+                    style="fill:#ffff80;fill-rule:evenodd;stroke-width:0;stroke-opacity:1"/>
+            <text
+                    id="pc-set-addr-deluxe"
+                    style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1em;line-height:125%;font-family:sans-serif;text-align:center;letter-spacing:0;word-spacing:0;text-anchor:middle;fill:#000000"
+                    x="700"
+                    y="667">0x00
+            </text>
+        </g>
+    </svg>
+
+    <br/>
+
+    <button class="command" id="btn-step" onmousedown="mc14500StepUp()" onmouseup="mc14500StepDown()" type="button">
+        Step
+    </button>
+    <button class="command" id="btn-run" onclick="mc14500Run()" type="button">Run</button>
+    <button class="command" id="btn-speed" onclick="mc14500Speed()" type="button">Fast</button>
+    <button class="command" id="btn-reset" onclick="mc14500Reset()" type="button">Reset</button>
+    <hr/>
+    <span id="cur-pgm-desc"></span>
+    <hr/>
+    <div id="program-selection">
+        <!-- Javascript should fill this in on load -->
+        <span id="program-list-left"></span>
+        <span id="program-list-right"></span>
+    </div>
+
+</div>
+
+</body>
+
+</html>
