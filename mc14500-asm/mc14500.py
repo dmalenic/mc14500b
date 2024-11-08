@@ -11,8 +11,8 @@ from mc14500util import BYTE_FMT, NIBBLE_FMT, NIBBLE3_FMT, WORD_FMT, MC14500_VER
 # Assembler for the mc14500 Industrial Control Unit (ICU) that is also considered as a 1-bit processor
 # ----------------------------------------------------------------------------------------------------
 
-# (c) 2010 urs@linurs.org
-# (c )2024 Damir Maleničić
+# (c) 2010 Urs Lindegger
+# (c) 2024 Damir Maleničić
 
 # ----------------------------------------------------------------------------------------------------
 # Hardware dependent configuration, adjust to match your hardware
@@ -77,7 +77,7 @@ def map_lut_index_to_label_location(asm_file_name, key, value):
     return lut_dump_idx, addr
 
 
-def dummp_lut_to_integer_array(asm_file_name):
+def dump_lut_to_integer_array(asm_file_name):
     """
     Creates a LUT dump as a list of program counter values of a size of LUT table (IO address space)
     :param asm_file_name:
@@ -101,7 +101,7 @@ def dummp_lut_to_integer_array(asm_file_name):
     return lut_dump
 
 
-def dummp_lut_to_byte_array(asm_file_name):
+def dump_lut_to_byte_array(asm_file_name):
     """
     Creates a LUT dump as an array of bytes of a size of LUT table times memory width divided by 8
     :param asm_file_name:
@@ -680,7 +680,8 @@ def export_to_mif_file(outfile, lut_outfile,  asm_file_name, err_ctr):
         addr_fmt, data_fmt = get_addr_and_data_fmt_strings()
 
         undefied_addresses = []
-        for i in range(max(rom.keys()) + 1):
+        prog_end = max(rom.keys()) + 1 if len(rom.keys()) > 0 else 0
+        for i in range(prog_end):
             if rom.get(i, None) is None:
                 undefied_addresses.append(i)
             else:
@@ -695,7 +696,7 @@ def export_to_mif_file(outfile, lut_outfile,  asm_file_name, err_ctr):
                 out_string = "  " + addr_fmt % i + "   :   " + data_fmt % rom[i] + ";"
                 handle_mif_file.write(out_string + os.linesep)
 
-        start = max(rom.keys()) + 1
+        start = prog_end
         end = max_rom_depth - 1
         if start <= end:
             out_string = "  [" + (addr_fmt % start) + ".." + (addr_fmt % end) + "]   :   " + \
@@ -709,7 +710,7 @@ def export_to_mif_file(outfile, lut_outfile,  asm_file_name, err_ctr):
     if len(lut) > 0:
 
         with (open(lut_outfile, 'w') as handle_mif_file):
-            lut_dump = dummp_lut_to_integer_array(asm_file_name)
+            lut_dump = dump_lut_to_integer_array(asm_file_name)
             handle_mif_file.write(
                 "% -----------------------------------------------------------------------------" + os.linesep)
             handle_mif_file.write("MC14500 Assembler Generated Memory Initialization File for LUT" + os.linesep)
@@ -877,7 +878,7 @@ def export_to_srec_file(asm_file_name):
     print("SREC file: ", outfile, "crated")
 
     if len(lut) > 0:
-        lut_dump = dummp_lut_to_byte_array(asm_file_name)
+        lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.srec")
         export_memory_dump_to_srec_file(lut_outfile, lut_dump)
         # create srec file
@@ -898,7 +899,7 @@ def export_to_hex_file(asm_file_name):
         print("Hex file: ", outfile, "crated")
 
     if len(lut) > 0:
-        lut_dump = dummp_lut_to_byte_array(asm_file_name)
+        lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.hex")
         with open(lut_outfile, 'w') as handle_out_file:
             handle_out_file.write(lut_dump.hex().upper())
@@ -919,7 +920,7 @@ def export_to_raw_binary_file(asm_file_name):
         print("Binary file: ", outfile, "crated")
 
     if len(lut) > 0:
-        lut_dump = dummp_lut_to_byte_array(asm_file_name)
+        lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.bin")
         with open(lut_outfile, 'wb') as handle_out_file:
             handle_out_file.write(lut_dump)
@@ -996,16 +997,18 @@ def main():
 
     print()
     print("MC14500 Assembler for the ICU 1-bit processor." + os.linesep +
-          "Based on the original work of urs@linurs.org." + os.linesep +
+          "Based on the original work of Urs Lindegger." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
     print("Version " + MC14500_VERSION)
     print()
+    print(f"ROM depth: {max_rom_depth} [words]")
+    print(f"ROM width: {rom_width} [bits]")
     if ins_pos_str == 'first':
-        print("Note: The 4 most significant bits are the mc14500 instruction")
+        print("The 4 most significant bits are the mc14500 instruction op-code")
     else:
-        print("Note: The 4 least significant bits are the mc14500 instruction")
-    print("      the other bits are the io address. This might be different")
-    print("      on your hardware, since it is external to the mc14500 chip.")
+        print("The 4 least significant bits are the mc14500 instruction op-code")
+    print("the other bits are the io address. This might be different")
+    print("on your hardware since it is external to the mc14500 chip.")
     print()
 
     # check self configuration and consistency

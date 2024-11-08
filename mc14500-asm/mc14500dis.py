@@ -12,7 +12,7 @@ from mc14500util import BYTE_FMT, NIBBLE_FMT, NIBBLE3_FMT, MC14500_VERSION, srec
 # Disassembler of the MC14500 Industrial Control Unit (ICU) that is also called 1-bit processor.
 # ----------------------------------------------------------------------------------------------------
 
-# (c) 2009 urs@linurs.org
+# (c) 2010 Urs Lindegger
 # (c) 2024 Damir Maleničić
 
 # ----------------------------------------------------------------------------------------------------
@@ -295,10 +295,10 @@ def export_disassembly_file(input_file_name, output_file_name):
     global rom_cmd_order
 
     with open(output_file_name, 'w') as handle_dis_file:
-        handle_dis_file.write("# Code created with disassembler mc14500dis from urs@linurs.org\r\n")
-        handle_dis_file.write("# Input file " + input_file_name + "\r\n")
-        handle_dis_file.write("# Version " + MC14500_VERSION + "\r\n")
-        handle_dis_file.write("# Creation date " + time.ctime() + "\r\n")
+        handle_dis_file.write("; Code created with disassembler mc14500dis\r\n")
+        handle_dis_file.write("; Input file " + input_file_name + "\r\n")
+        handle_dis_file.write("; Version " + MC14500_VERSION + "\r\n")
+        handle_dis_file.write("; Creation date " + time.ctime() + "\r\n")
         for i in range(len(rom)):
             if i != rom[i][0]:
                 print("Error: Memory hole detected on addrss", hex(i), "expeced location", rom[i][0], ".")
@@ -1094,8 +1094,15 @@ def main():
 
     print()
     print("MC14500 Disassembler for the ICU 1-bit processor." + os.linesep +
-          "Based on the original work of urs@linurs.org." + os.linesep +
+          "Based on the original work of Urs Lindegger." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
+    print()
+    print(f"ROM depth: {max_rom_depth} [words]")
+    print(f"ROM width: {rom_width} [bits]")
+    if ins_pos_str == 'first':
+        print("The 4 most significant bits are the mc14500 instruction op-code.")
+    else:
+        print("The 4 least significant bits are the mc14500 instruction op-code")
     print("Supported input file formats: Motorola S-record in S19-style,")
     print("                              Memory Initialization File (mif),")
     print("                              HEX and raw binary.")

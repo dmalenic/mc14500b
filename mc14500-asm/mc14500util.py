@@ -2,7 +2,7 @@
 # Code shared between the MC14500 disassembler and the MC14500 assembler
 # ----------------------------------------------------------------------------------------------------
 
-# (c) 2010 urs@linurs.org
+# (c) 2010 Urs Lindegger
 # (c) 2024 Damir Maleničić
 
 BYTE_FMT = "%2.2X"      # format string for byte output

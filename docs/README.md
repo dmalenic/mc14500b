@@ -1,8 +1,8 @@
 # MC14500 Projects
 
-This project modernizes an old [MC 14500B assembler, disassembler, and web-based simulator](https://www.linurs.org/mc14500/) initially written by [Urs Lindegger](https://www.linurs.org/).
+This project modernizes an old [MC 14500B assembler, disassembler, and web-based simulator](https://www.linurs.org/mc14500.html) initially written by [Urs Lindegger](https://www.linurs.org/).
 
-The project is available at [github](https://github.com/dmalenic/mc14500b/)
+The project is available at [GitHub](https://github.com/dmalenic/mc14500b/)
 
 ## MC14500 Assembler and Disassembler
 
@@ -16,4 +16,4 @@ For more information, please visit [mc14500b-asm](https://github.com/dmalenic/mc
 
 The detailed documentation can be found at project [README](https://github.com/dmalenic/mc14500b/tree/main).
 
-You can try the simulator in your [browser](mc14500-sim/index.html).
+You can try the simulator in [browser](mc14500-sim/index.html).

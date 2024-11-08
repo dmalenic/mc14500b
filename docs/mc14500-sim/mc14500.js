@@ -21,7 +21,6 @@ let inputData = 0;
 let ienInputData = 0;
 let x1 = 0;
 
-let fresh = true;
 let run = false;
 let clk = null;
 let fast = false;
@@ -111,7 +110,6 @@ export function mc14500Init(programFastModeDelay, programRom, newTimerMaxCount =
     output = [0, 0, 0, 0, 0, 0, 0, 0];
     ram = [0, 0, 0, 0, 0, 0, 0, 0];
     run = false;
-    fresh = true;
 
     lut = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,];
     lifo = [];
@@ -305,7 +303,6 @@ export function mc14500Reset() {
         clearTimeout(clk);
     }
     clk = null;
-    fresh = true;
     resetInternalState();
     processSignals();
     updateHtml();
@@ -327,7 +324,9 @@ export function mc14500Speed() {
  * Simulates x1 clock signal transition down in single step mode
  */
 export function mc14500StepDown() {
-    x1Down();
+    if (!run) {
+        x1Up();
+    }
 }
 
 
@@ -335,7 +334,7 @@ export function mc14500StepDown() {
  * Simulates x1 clock signal transition up in single step mode
  */
 export function mc14500StepUp() {
-    x1Up();
+    x1Down();
 }
 
 
@@ -385,7 +384,7 @@ function resetInternalState() {
     outputData = 0;
     inputData = 0;
     ienInputData = 0;
-    x1 = 0;
+    x1 = 1;
     lifo = [];
 }
 
@@ -522,8 +521,6 @@ function x1Up() {
     x1 = 1;
     if (jumpExecuted === true) {
         // do nothing
-    } else if (fresh) {
-        fresh = false;
     } else {
         pc += 1;
     }
