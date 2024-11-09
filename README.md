@@ -6,6 +6,9 @@
 
 - `github.io` [docs](https://dmalenic.github.io/mc14500b/).
 
+The MC14500 is an Industrial Control Unit (ICU) that is also considered to be a 1-bit processor. It was produced by
+Motorola, but the production has been stopped years ago.
+
 ## MC14500 Assembler and Disassembler
 
 This project is a modernization of an old [MC 14500B Assembler and Disassembler](https://www.linurs.org/download/mc14500-0.4.tar.gz) written initially 
@@ -419,17 +422,22 @@ This project modernizes the [MC 14500B Simulator](https://www.linurs.org/mc14500
 
 The following related resources were available on 2024-10-21 and may not be available when you read this:
 
-- [MC14500B Wikipedia Article](https://en.wikipedia.org/wiki/Motorola_MC14500B),
-
 - [MC14500B Datasheet](https://bitsavers.org/components/motorola/14500/MC14500B_Rev3.pdf),
 
 - [MC14500B Industrial Control Unit Handbook](https://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf), the alternative download location [archive.org](https://web.archive.org/web/20220220062727/http://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf),
 
 - 1978 [Motorola CMOS Integrated Circuits](https://bitsavers.org/components/motorola/_dataBooks/1978_Motorola_CMOS_Data_Book.pdf) Data Book page 358,
 
+- [US Patent 4,153,942](https://patentimages.storage.googleapis.com/4e/ea/42/0ecdf6ebef6592/US4153942.pdf) is Motorola
+  patent for an industrial control processor that describes MC14500 B's internal working,
+
+- [MC14500B Wikipedia Article](https://en.wikipedia.org/wiki/Motorola_MC14500B),
+
 - Urs Lindegger's [MC14500B Simulator](https://www.linurs.org/index.html),
 
-- Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs).
+- Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
+
+- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
 
 ## MC14500 Demo Programs
 
@@ -601,7 +609,7 @@ The implementation was influenced by Yaroslav Veremenko's:
 
 - https://github.com/veremenko-y/mc14500-programs/blob/main/sbc1/killthebit.s,
 
-and Nikola Cimino's:
+and Nicola Cimmino's:
 
 - https://github.com/nicolacimmino/PLC-14500/blob/master/tools/assembler/examples/killthebit.asm
 
@@ -684,7 +692,7 @@ Others are my original work.
 
     - [Simulator](mc14500-sim/programs/running_lights.js).
 
-- __Self Test__: A simple program to exercise all emulator parts. It is inspired by Nikola Cimino's
+- __Self Test__: A simple program to exercise all emulator parts. It is inspired by Nicola Cimmino's
   program [PLC-14500 Smoketest2](https://github.com/nicolacimmino/PLC-14500/blob/master/tools/assembler/examples/smoketest2.asm).
 
     - [Assembler](mc14500-asm/examples/selftest/selftest.asm),
