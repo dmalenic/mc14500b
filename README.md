@@ -1,13 +1,38 @@
 # MC14500 Projects
 
+- [MC14500 Resources](#mc14500-resources)
+
 - [MC14500 Assembler and Disassembler](#mc14500-assembler-and-disassembler)
 
 - [MC14500 Simulator](#mc14500-simulator)
+
+- [MC14500 Demo Programs](#mc14500-demo-programs)
 
 - `github.io` [docs](https://dmalenic.github.io/mc14500b/).
 
 The MC14500 is an Industrial Control Unit (ICU) that is also considered to be a 1-bit processor. It was produced by
 Motorola, but the production has been stopped years ago.
+
+## MC14500 Resources
+
+The following related resources were available on 2024-10-21 and may not be available when you read this:
+
+- [MC14500B Datasheet](https://bitsavers.org/components/motorola/14500/MC14500B_Rev3.pdf),
+
+- [MC14500B Industrial Control Unit Handbook](https://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf), the alternative download location [archive.org](https://web.archive.org/web/20220220062727/http://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf),
+
+- 1978 [Motorola CMOS Integrated Circuits](https://bitsavers.org/components/motorola/_dataBooks/1978_Motorola_CMOS_Data_Book.pdf) Data Book page 358,
+
+- [US Patent 4,153,942](https://patentimages.storage.googleapis.com/4e/ea/42/0ecdf6ebef6592/US4153942.pdf) is Motorola
+  patent for an industrial control processor that describes MC14500 B's internal working,
+
+- [MC14500B Wikipedia Article](https://en.wikipedia.org/wiki/Motorola_MC14500B),
+
+- Urs Lindegger's [MC14500B Simulator](https://www.linurs.org/index.html),
+
+- Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
+
+- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
 
 ## MC14500 Assembler and Disassembler
 
@@ -96,7 +121,7 @@ Makefile can be invoked with the following arguments that will be internally pas
 #### Synopsis
 
 ```bash
-usage: mc14500.py [-v] [-h] [-s] [-x] [-b] [-w width] [-d depth] [-I include_directory] [-i instr_position] [-n non_programmed_location_value] input_file
+usage: mc14500.py [-h] [-v] [-w {8,12,16}] [-d DEPTH] [-i {first,last}] [-I INCLUDE] [-s] [-x] [-a] [-b] [-n {0,F}] input_file
 
 MC14500 Assembler
 
@@ -107,16 +132,17 @@ options:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -w {8,12,16}, --width {8,12,16}
-                        the width of the ROM in bits (8, 12 or 16)
+                        the width of the ROM in bits (8, 12 or 16). The default value is 8.
   -d DEPTH, --depth DEPTH
-                        the depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to and including 65536
+                        the depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to and including 65536. The default value is 256.
   -i {first,last}, --instr-position {first,last}
-                        the position of INS field in a command: first|last, default is last
+                        the position of INS field in a command: first|last. The default value is last.
   -I INCLUDE, --include INCLUDE
                         an additonal directory to look for include files beside the current working directory
-  -s, --srec            generate Motorola S-record file
-  -x, --hex             generate HEX file
-  -b, --binary          generate raw binary file
+  -s, --srec            generate Motorola S-record file (extension .srec)
+  -x, --hex             generate Intel I8HEX file (extension .hex)
+  -a, --ascii_hex       generate ASCII HEX file (extension .ascii_hex)
+  -b, --binary          generate raw binary file (extension .bin)
   -n {0,F}, --non-programmed-location-value {0,F}
                         the value that is expected to be present in ROM locations that are not part of program
 ```
@@ -148,7 +174,12 @@ The `.asm` extension for the input file is recommended but not mandatory. Any ex
 for the various output files can be used. The produced output files share the same base name as the input file, but the
 extension has been replaced.
 
+If one or more errors are encountered, error messages are written to `stderr`. OOnly the listing file is produced,
+containing the exact error messages written to `stderr`. The program exit value is 1.
+
 #### Options
+
+- `a`, `--ascii_hex` output assembled machine code in ASCII HEX format. The output file has `.ascii_hex` extension.
 
 - `-b`, `--binary` output assembled machine code in a raw binary format. The output file has `.bin` extension.
 
@@ -179,10 +210,7 @@ extension has been replaced.
 - `-w {8, 12, 16}`, `--width {8, 12, 16}` defines the width of the program ROM word in bits. The allowed values are
   `8`, `12`, or `16`. The default value is `8`.
 
-- `-x`, `--hex` output assembled machine code in HEX. The output file has `.hex` extension.
-
-If one or more errors are encountered, error messages are written to `stderr`. OOnly the listing file is produced,
-containing the exact error messages written to `stderr`. The program exit value is 1.
+- `-x`, `--hex` output assembled machine code in Intel HEX format (I8HEX flavor). The output file has `.hex` extension.
 
 #### Pseudo Instructions
 
@@ -234,7 +262,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
   ```
   It outputs the following message on the screen:
   ```bash
-  
+
   MC14500 Assembler for the ICU 1-bit processor.
   Based on the original work of Urs Lindegger.
   see https://www.linurs.org/mc14500.html
@@ -264,7 +292,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
   ```
   It outputs the following message on the screen:
   ```bash
-
+  
   MC14500 Assembler for the ICU 1-bit processor.
   Based on the original work of Urs Lindegger.
   see https://www.linurs.org/mc14500.html
@@ -272,7 +300,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
   
   ROM depth: 512 [words]
   ROM width: 12 [bits]
-  The 4 most significant bits are the mc14500 instruction op-code.
+  The 4 most significant bits are the mc14500 instruction op-code
   the other bits are the io address. This might be different
   on your hardware since it is external to the mc14500 chip.
   
@@ -290,7 +318,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
   ```
   It outputs the same message on the screen:
   ```bash
-
+  
   MC14500 Assembler for the ICU 1-bit processor.
   Based on the original work of Urs Lindegger.
   see https://www.linurs.org/mc14500.html
@@ -298,7 +326,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
   
   ROM depth: 512 [words]
   ROM width: 12 [bits]
-  The 4 most significant bits are the mc14500 instruction op-code.
+  The 4 most significant bits are the mc14500 instruction op-code
   the other bits are the io address. This might be different
   on your hardware since it is external to the mc14500 chip.
   
@@ -311,7 +339,7 @@ The following examples assume that they are executed from [examples](mc14500-asm
 - The following example requests additional `.srec`, `.hex` and `bin` outputs
 
   ```bash
-  ../mc14500.py -I include/ -s -x -b 1d-conways-gol/1d-conways-gol.asm
+  ../mc14500.py -I include/ -s -x -a -b 1d-conways-gol/1d-conways-gol.asm
   ```
   It outputs the following message on the screen:
   ```bash
@@ -330,17 +358,19 @@ The following examples assume that they are executed from [examples](mc14500-asm
   LST file:  1d-conways-gol/1d-conways-gol.lst crated
   Mif file:  1d-conways-gol/1d-conways-gol.mif created
   SREC file:  1d-conways-gol/1d-conways-gol.srec crated
-  Hex file:  1d-conways-gol/1d-conways-gol.hex crated
+  Intel HEX file (I8HEX flavor):  1d-conways-gol/1d-conways-gol.hex crated
+  Ascii hex file:  1d-conways-gol/1d-conways-gol.ascii_hex crated
   Binary file:  1d-conways-gol/1d-conways-gol.bin crated
   Map file:  1d-conways-gol/1d-conways-gol.map crated
   Assembler succeeded
   ```
-  Note the 6 output files are produced:
+  Note the 7 output files are produced:
 
   - `1d-conways-gol/1d-conways-gol.lst` - the assembler listing file,
   - `1d-conways-gol/1d-conways-gol.mif` - the machine code in Memory Interchange Format,
   - `1d-conways-gol/1d-conways-gol.srec` - the machine code in Motorola S-record format,
-  - `1d-conways-gol/1d-conways-gol.hex` - the machine code in ASCII HEX format,
+  - `1d-conways-gol/1d-conways-gol.hex` - the machine code in Intel's HEX format (I8HEX flavor),
+  - `1d-conways-gol/1d-conways-gol.ascii_hex` - the machine code in ASCII HEX format,
   - `1d-conways-gol/1d-conways-gol.bin` - the machine code as raw bytes,
   - `1d-conways-gol/1d-conways-gol.map` - the io-address usage mapping file. 
 
@@ -349,22 +379,57 @@ The following examples assume that they are executed from [examples](mc14500-asm
 #### Synopsis
 
 ```bash
-usage: mc14500dis.py [-v] [-h] [-w width] [-i instr_position] [-o output_file] input_file
+usage: mc14500dis.py [-h] [-o OUT] [-v] [-w {8,12,16}] [-i {first,last}] input_file
 
 MC14500 Disassembler
 
 positional arguments:
-  input_file            input file in srec, hex or bin format
+  input_file            input file nsme. Input file must have extension .mif, .srec, .hex, .ascii_hex or .bin
 
 options:
   -h, --help            show this help message and exit
-  -o OUT, --out OUT     output file, default is input file name with appended .dis extension
+  -o OUT, --out OUT     OUT is the output file name. The default value is the input file name with appended .dis extension.
   -v, --version         show program's version number and exit
   -w {8,12,16}, --width {8,12,16}
-                        the width of the ROM in bits (8, 12 or 16), required for hex and bin input file format
+                        the width of the ROM in bits (8, 12 or 16). It is ignored for mif files. The default vaule is 8.
   -i {first,last}, --instr-position {first,last}
-                        position of INS field in a command: first|last, default is last
+                        position of INS field in a command: first|last. The default value is last.
 ```
+
+#### Description
+
+The `mc14500dis.py` is the MC14500B disassembler written in Python 3. It takes an input file as the argument and, if no
+error has been encountered, creates the output files containing assembler lising. The extension of the input file
+indicates the expected input file format. Following extensions are supported:
+
+- `.mif` - the input file is a Memory Exchange Format file,
+
+- `.srec` - the input file is Motorla SREC file,
+
+- `.hex` - the input file is Intel HEX file in I8HEX flavor,
+
+- `.ascii_hex` - the input file is the ASCII HEX file,
+
+- `.bin` - the input file is raw binary file. 
+
+If an error is encountered, it is written to `stderr` and no or partial output is produced.
+
+#### Options
+
+- `-h`, `--help` show the program help information, and exit.
+
+- `-i {first, last}`, `--instr-position {first, last}` defines the position of the 4 instruction op-code bits within
+  the assembled machine code word. The value `first` indicates that the 4 most-significant bits are used to encode the
+  MC14500B instruction op-code, and the value `last` indicates that the 4 least-significant bits are used to encode
+  the MC14500B instruction op-code. The default value is `last`.
+
+- `-o OUT`, `--out OUT` where OUT defines the output file name. The default is the input file name with appended `.dis`
+  extension.
+
+- `-v`, `--version` show the program version and exit.
+
+- `-w {8, 12, 16}`, `--width {8, 12, 16}` defines the width of the program ROM word in bits. The allowed values are
+  `8`, `12`, or `16`. The default value is `8`. It is ignroed for `.mif` extensions.
 
 `TODO describe disassembler usage`
 
@@ -417,27 +482,6 @@ This project modernizes the [MC 14500B Simulator](https://www.linurs.org/mc14500
   the simulator.
 
 - [programs](mc14500-sim/programs) - Directory containing the MC14500 programs repository.
-
-## MC14500 Resources
-
-The following related resources were available on 2024-10-21 and may not be available when you read this:
-
-- [MC14500B Datasheet](https://bitsavers.org/components/motorola/14500/MC14500B_Rev3.pdf),
-
-- [MC14500B Industrial Control Unit Handbook](https://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf), the alternative download location [archive.org](https://web.archive.org/web/20220220062727/http://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf),
-
-- 1978 [Motorola CMOS Integrated Circuits](https://bitsavers.org/components/motorola/_dataBooks/1978_Motorola_CMOS_Data_Book.pdf) Data Book page 358,
-
-- [US Patent 4,153,942](https://patentimages.storage.googleapis.com/4e/ea/42/0ecdf6ebef6592/US4153942.pdf) is Motorola
-  patent for an industrial control processor that describes MC14500 B's internal working,
-
-- [MC14500B Wikipedia Article](https://en.wikipedia.org/wiki/Motorola_MC14500B),
-
-- Urs Lindegger's [MC14500B Simulator](https://www.linurs.org/index.html),
-
-- Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
-
-- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
 
 ## MC14500 Demo Programs
 
