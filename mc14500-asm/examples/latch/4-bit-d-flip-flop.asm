@@ -11,17 +11,17 @@
 INIT
 
 ; Define signal names for the latch
-D0      EQU 01
-D1      EQU 02
-D2      EQU 03
-D3      EQU 04
-CLK     EQU 05
-Q0      EQU 00
-Q1      EQU 01
-Q2      EQU 02
-Q3      EQU 03
-TEMP    EQU 08
-OLD_CLK EQU 09
+D0      EQU     0x01
+D1      EQU     0x02
+D2      EQU     0x03
+D3      EQU     0x04
+CLK     EQU     0x05
+Q0      EQU     0x00
+Q1      EQU     0x01
+Q2      EQU     0x02
+Q3      EQU     0x03
+TEMP    EQU     0x08
+OLD_CLK EQU     0x09
 
 
 LD      OLD_CLK ; Move OLD_CLK to ...

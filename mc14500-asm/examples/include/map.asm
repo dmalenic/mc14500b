@@ -5,75 +5,75 @@
 ; ------------------------------------------
 ; Inputs
 ; ------------------------------------------
-RR      EQU     000  Pin RR is wired to input 0
-IN1     EQU     001
-IN2     EQU     002
-IN3     EQU     003
-IN4     EQU     004
-IN5     EQU     005
-IN6     EQU     006
-IN7     EQU     007
-IN8     EQU     008
-IN9     EQU     009
-IN10    EQU     00A
-IN11    EQU     00B
-IN12    EQU     00C
-IN13    EQU     00D
-IN14    EQU     00E
-IN15    EQU     00F
+RR      EQU     0x000  Pin RR is wired to input 0
+IN1     EQU     0x001
+IN2     EQU     0x002
+IN3     EQU     0x003
+IN4     EQU     0x004
+IN5     EQU     0x005
+IN6     EQU     0x006
+IN7     EQU     0x007
+IN8     EQU     0x008
+IN9     EQU     0x009
+IN10    EQU     0x00A
+IN11    EQU     0x00B
+IN12    EQU     0x00C
+IN13    EQU     0x00D
+IN14    EQU     0x00E
+IN15    EQU     0x00F
 
 ; ------------------------------------------
 ; Outputs
 ; ------------------------------------------
-OUT0    EQU     400
-OUT1    EQU     401
-OUT2    EQU     402
-OUT3    EQU     403
-OUT4    EQU     404
-OUT5    EQU     405
-OUT6    EQU     406
-OUT7    EQU     407
-OUT8    EQU     408
-OUT9    EQU     409
-OUT10   EQU     40A
-OUT11   EQU     40B
-OUT12   EQU     40C
-OUT13   EQU     40D
-OUT14   EQU     40E
-OUT15   EQU     40F
+OUT0    EQU     0x400
+OUT1    EQU     0x401
+OUT2    EQU     0x402
+OUT3    EQU     0x403
+OUT4    EQU     0x404
+OUT5    EQU     0x405
+OUT6    EQU     0x406
+OUT7    EQU     0x407
+OUT8    EQU     0x408
+OUT9    EQU     0x409
+OUT10   EQU     0x40A
+OUT11   EQU     0x40B
+OUT12   EQU     0x40C
+OUT13   EQU     0x40D
+OUT14   EQU     0x40E
+OUT15   EQU     0x40F
 
 ; ------------------------------------------
 ; RAM just the first
 ; ------------------------------------------
-RAM00   EQU     800
-RAM01   EQU     801
-RAM02   EQU     802
-RAM03   EQU     803
-RAM04   EQU     804
-RAM05   EQU     805
-RAM06   EQU     806
-RAM07   EQU     807
-RAM08   EQU     808
-RAM09   EQU     809
-RAM0A   EQU     80A
-RAM0B   EQU     80B
-RAM0C   EQU     80C
-RAM0D   EQU     80D
-RAM0E   EQU     80E
-RAM0F   EQU     80F
-RAM10   EQU     810
-RAM11   EQU     811
-RAM12   EQU     812
-RAM13   EQU     813
-RAM14   EQU     814
-RAM15   EQU     815
-RAM16   EQU     816
-RAM17   EQU     817
-RAM18   EQU     818
-RAM19   EQU     819
-RAM1A   EQU     81A
-RAM1B   EQU     81B
-RAM1C   EQU     81C
-RAM1D   EQU     81D
-RAM1E   EQU     81E
-RAM1F   EQU     81F
+RAM00   EQU     0x800
+RAM01   EQU     0x801
+RAM02   EQU     0x802
+RAM03   EQU     0x803
+RAM04   EQU     0x804
+RAM05   EQU     0x805
+RAM06   EQU     0x806
+RAM07   EQU     0x807
+RAM08   EQU     0x808
+RAM09   EQU     0x809
+RAM0A   EQU     0x80A
+RAM0B   EQU     0x80B
+RAM0C   EQU     0x80C
+RAM0D   EQU     0x80D
+RAM0E   EQU     0x80E
+RAM0F   EQU     0x80F
+RAM10   EQU     0x810
+RAM11   EQU     0x811
+RAM12   EQU     0x812
+RAM13   EQU     0x813
+RAM14   EQU     0x814
+RAM15   EQU     0x815
+RAM16   EQU     0x816
+RAM17   EQU     0x817
+RAM18   EQU     0x818
+RAM19   EQU     0x819
+RAM1A   EQU     0x81A
+RAM1B   EQU     0x81B
+RAM1C   EQU     0x81C
+RAM1D   EQU     0x81D
+RAM1E   EQU     0x81E
+RAM1F   EQU     0x81F

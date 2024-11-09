@@ -31,29 +31,29 @@
 
 MC14500MAP
 
-BTN_TGL     EQU RAM0    ; A button toggle indicator
-BIT_1       EQU RAM1    ; Internal bit 1
-BIT_2       EQU RAM2    ; Internal bit 2
-BIT_3       EQU RAM3    ; Internal bit 3
-BIT_4       EQU RAM4    ; Internal bit 4
-BIT_5       EQU RAM5    ; Internal bit 5
-BIT_6       EQU RAM6    ; Internal bit 6
-TMP         EQU RAM7    ; Temporary storage when swapping bits
-LED_1       EQU OUT1    ; LED 1
-LED_2       EQU OUT2    ; LED 2
-LED_3       EQU OUT3    ; LED 3
-LED_4       EQU OUT4    ; LED 4
-LED_5       EQU OUT5    ; LED 5
-LED_6       EQU OUT6    ; LED 6
-BUTTON_1    EQU IN1     ; The button that user uses to interract with the game
-BUTTON_2    EQU IN2     ; The button that user uses to interract with the game
-BUTTON_3    EQU IN3     ; The button that user uses to interract with the game
-BUTTON_4    EQU IN4     ; The button that user uses to interract with the game
-BUTTON_5    EQU IN5     ; The button that user uses to interract with the game
-BUTTON_6    EQU IN6     ; The button that user uses to interract with the game
+BTN_TGL     EQU     RAM0    ; A button toggle indicator
+BIT_1       EQU     RAM1    ; Internal bit 1
+BIT_2       EQU     RAM2    ; Internal bit 2
+BIT_3       EQU     RAM3    ; Internal bit 3
+BIT_4       EQU     RAM4    ; Internal bit 4
+BIT_5       EQU     RAM5    ; Internal bit 5
+BIT_6       EQU     RAM6    ; Internal bit 6
+TMP         EQU     RAM7    ; Temporary storage when swapping bits
+LED_1       EQU     OUT1    ; LED 1
+LED_2       EQU     OUT2    ; LED 2
+LED_3       EQU     OUT3    ; LED 3
+LED_4       EQU     OUT4    ; LED 4
+LED_5       EQU     OUT5    ; LED 5
+LED_6       EQU     OUT6    ; LED 6
+BUTTON_1    EQU     IN1     ; The button that user uses to interract with the game
+BUTTON_2    EQU     IN2     ; The button that user uses to interract with the game
+BUTTON_3    EQU     IN3     ; The button that user uses to interract with the game
+BUTTON_4    EQU     IN4     ; The button that user uses to interract with the game
+BUTTON_5    EQU     IN5     ; The button that user uses to interract with the game
+BUTTON_6    EQU     IN6     ; The button that user uses to interract with the game
 
-TIMER_OUT   EQU IN7     ; Timer output
-TIMER_TRIG  EQU IN7     ; Timer trigger
+TIMER_OUT   EQU     IN7     ; Timer output
+TIMER_TRIG  EQU     IN7     ; Timer trigger
 
 ; ------------------------------------------------------
 ; Initialization code to enable input and output.

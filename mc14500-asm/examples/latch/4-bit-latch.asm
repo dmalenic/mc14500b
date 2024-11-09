@@ -11,15 +11,15 @@
 INIT
 
 ; Define signal names for the latch
-D0   EQU 01
-D1   EQU 02
-D2   EQU 03
-D3   EQU 04
-CLK  EQU 05
-Q0   EQU 00
-Q1   EQU 01
-Q2   EQU 02
-Q3   EQU 03
+D0   EQU    0x01
+D1   EQU    0x02
+D2   EQU    0x03
+D3   EQU    0x04
+CLK  EQU    0x05
+Q0   EQU    0x00
+Q1   EQU    0x01
+Q2   EQU    0x02
+Q3   EQU    0x03
 
 OEN  CLK
 LD   D0

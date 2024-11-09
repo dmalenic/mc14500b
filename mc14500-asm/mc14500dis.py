@@ -70,12 +70,12 @@ def to_hex_io_address(io_address, rom_width_):
         hex_io_address = BYTE_FMT % io_address
     else:
         hex_io_address = NIBBLE3_FMT % io_address
-    return hex_io_address
+    return "0x" + hex_io_address
 
 
 def process_srec_file(input_file):
     """
-    Reads the Motorola S record file and interprets the contents
+    Reads the Motorola S record file and writes the contents to the ROM
     :param input_file:
     :return: None
     """
@@ -136,9 +136,118 @@ def process_srec_file(input_file):
         old_pc = rom[i][0]
 
 
-def process_hex_file(input_file):
+def validate_i8hex_checksum(i8hex_line):
     """
-    Reads the hex file and interprets the contents
+    Validates the checksum of an Intel i8hex line
+    :param i8hex_line:
+    :return: True if the checksum is valid, False otherwise
+    """
+    return (sum([int(i8hex_line[i:i + 2], 16) for i in range(0, len(i8hex_line), 2)]) & 0xFF) == 0
+
+
+def parse_i8hex_line(line, line_no, input_file):
+    """
+    Parses an Intel i8hex line, split at the colon and validates the checksum
+    :param line:
+    :param line_no:
+    :param input_file:
+    :return: part after column without checkum, None if an error occurs
+    """
+    global error_counter
+
+    line = line.strip('\r\n')
+    line = line.upper()
+    parts = line.split(':')
+
+    if len(parts) < 2:
+        print(f"Error: I8HEX format, record does not contain ':' character in file {input_file} at line {line_no}")
+        error_counter += 1
+        return None
+    elif len(parts) > 2:
+        print(f"Error: I8HEX format, record contains multiple ':' charactes in file {input_file} at line {line_no}")
+        error_counter += 1
+
+    # everytning before ':' is treated as comment and can be ignored
+
+    if not validate_i8hex_checksum(parts[1]):
+        print(f"Error: in file {input_file} at line {line_no}, I8HEX format,  invalid Intel i8hex checksum value.")
+        error_counter += 1
+        return None
+
+    for c in parts[1]:
+        if c not in '0123456789ABCDEF':
+            print(f"Error: in file {input_file} at line {line_no}, I8HEX format, invalid character '{c}'.")
+            error_counter += 1
+            return None
+
+    # remove checksum
+    return parts[1][:-2]
+
+
+def process_intel_hex_file(input_file):
+    """
+    Reads the Intel i8hex file and writes the contents to the ROM
+    :param input_file:
+    :return: None
+    """
+    global rom
+    global error_counter
+
+    print("Intel i8hex file selected.")
+
+    with open(input_file, 'r') as handle_i8hex_file:
+        i8hex_file_content = handle_i8hex_file.readlines()
+
+    match rom_width:
+        case 8:
+            i8hex_file_data_chars_per_mem_loc = 2
+        case 12:
+            i8hex_file_data_chars_per_mem_loc = 3
+        case _:
+            i8hex_file_data_chars_per_mem_loc = 4
+
+    line_no = 0
+    finished = False
+    for line in i8hex_file_content:
+        line_no += 1
+
+        if finished:
+            print(f"Error: in file {input_file} at line {line_no}, I8HEX format record '01' is not the last record.")
+            error_counter += 1
+            break
+
+        line = parse_i8hex_line(line, line_no, input_file)
+        if line is None:
+            return
+
+        count = int(line[:2], 16)
+        address = int(line[2:6], 16)
+        record_type = int(line[6:8], 16)
+        data_bytes = line[8:len(line)]
+
+        if len(data_bytes) != count * 2:
+            print(f"Error: in file {input_file} at line {line_no}, I8HEX format invalid data length.")
+            error_counter += 1
+            break
+
+        if record_type == 0:
+            address = address * 8 // rom_width
+            for i in range(0, len(data_bytes), i8hex_file_data_chars_per_mem_loc):
+                rom_entry = (address, int(data_bytes[i: i + i8hex_file_data_chars_per_mem_loc], 16))
+                rom += [rom_entry]
+                address += 1
+        elif record_type == 1:
+            finished = True
+        else:
+            print(f"Error: in file {input_file} at line {line_no}, "
+                  f"I8HEX format unsupported record type {record_type:2.2i}.")
+            error_counter += 1
+            break
+
+
+def process_ascii_hex_file(input_file):
+    """
+    Reads the ascii hex file and writes the contents to the ROM
     :param input_file:
     :return: None
     """
@@ -184,7 +293,7 @@ def process_hex_file(input_file):
 
 def process_bin_file(input_file):
     """
-    Reads the raw binary file and interprets the contents
+    Reads the raw binary file and writes the contents to the ROM
     :param input_file:
     :return: None
     """
@@ -1069,19 +1178,21 @@ def main():
     global rom_cmd_order
 
     parser = argparse.ArgumentParser(
-        usage='%(prog)s [-v] [-h] [-w width] [-i instr_position] [-o output_file] input_file',
         description='MC14500 Disassembler',
         add_help=True)
 
-    parser.add_argument('input_file', type=str, help='input file in srec, hex or bin format')
-    parser.add_argument('-o', '--out', type=str,
-                        help='output file, default is input file name with appended .dis extension')
+    parser.add_argument('input_file', type=str, help='input file nsme. Input file must have extension'
+                                                     ' .mif, .srec, .hex, .ascii_hex or .bin')
+    parser.add_argument('-o', '--out', type=str, default='',
+                        help='OUT is the output file name. The default value is the input file name with appended .dis'
+                             ' extension.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
-                        help='the width of the ROM in bits (8, 12 or 16), required for hex and bin input file format',
+                        help='the width of the ROM in bits (8, 12 or 16). It is ignored for mif files. '
+                             'The default vaule is 8.',
                         default=8, choices=[8, 12, 16])
     parser.add_argument('-i', '--instr-position', type=str,
-                        help='position of INS field in a command: first|last, default is last',
+                        help='position of INS field in a command: first|last. The default value is last.',
                         default='last',
                         choices=['first', 'last'])
 
@@ -1105,7 +1216,9 @@ def main():
         print("The 4 least significant bits are the mc14500 instruction op-code")
     print("Supported input file formats: Motorola S-record in S19-style,")
     print("                              Memory Initialization File (mif),")
-    print("                              HEX and raw binary.")
+    print("                              Intel HEX (hex),")
+    print("                              ASCII HEX (ascii_hex),")
+    print("                              raw binary (bin).")
     print("Version " + MC14500_VERSION)
     print()
 
@@ -1124,7 +1237,7 @@ def main():
 
     output_file_name = args.out
     if output_file_name == '':
-        output_file_name = ".".join(input_file_name_words[0:-1]) + '.dis'
+        output_file_name = input_file_name + '.dis'
 
     # get the disassembler input file
     if os.access(output_file_name, os.F_OK):
@@ -1141,7 +1254,9 @@ def main():
         case "mif":
             process_mif_file(input_file_name)
         case "hex":
-            process_hex_file(input_file_name)
+            process_intel_hex_file(input_file_name)
+        case "ascii_hex":
+            process_ascii_hex_file(input_file_name)
         case "bin":
             process_bin_file(input_file_name)
         case _:

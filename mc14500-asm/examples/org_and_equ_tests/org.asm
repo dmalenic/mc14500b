@@ -6,5 +6,5 @@
 
 ORG     10      ; Skip 10 memory locations and set the origin to 10
 INIT            ; enable inputs and outputs (macro introduces 3 instructions)
-ORG     10H     ; Skip next 3 instructions and set the origin to 10H = 16
+ORG     #$10    ; Skip next 3 instructions and set the origin to 10H = 16
 JMP

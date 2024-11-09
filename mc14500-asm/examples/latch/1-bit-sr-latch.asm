@@ -11,9 +11,9 @@
 INIT
 
 ; Define signal names for the latch
-S       EQU 01
-R       EQU 02
-Q       EQU 08
+S       EQU 0x01
+R       EQU 0x02
+Q       EQU 0x08
 
 ; output state of the flip-flop
 LD      Q

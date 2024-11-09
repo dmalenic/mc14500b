@@ -212,31 +212,37 @@ containing the exact error messages written to `stderr`. The program exit value 
 
 - `-x`, `--hex` output assembled machine code in Intel HEX format (I8HEX flavor). The output file has `.hex` extension.
 
-#### Pseudo Instructions
+Assembler Directives, Pseudo Instructions, and Numeical Constants
 
-- `EQU identifier value` defines an _identifier_ that, if encountered later in the program, is replaced with the _value_
+- `identifier EQU value` defines an _identifier_ that, if encountered later in the program, is replaced with the _value_
   before the line is converted to the machine code. The replacement logic is recursive. Recursion should terminate with
   a valid io-address declaration. It is typically used to define a symbolic name for an input, output, or RAM address,
   but it can also be used to define the instruction alias, see [rtn_jsr.asm](mc14500-asm/examples/rtn/rtn_jsr.asm).
+
+  Numerical constants can be written using `C`, `Python` notation. Motorola `6803` assembler and `DASM` immediate
+  operand syntax is also supported. See examples in [equ.asm](mc14500-asm/examples/org_and_equ_tests/equ.asm). All of
+  the following numerical constants are valid representations of the number eleven: 
+ `11`, `0xB`, `013`, `0o13`, `0b1011`, `#11`, `#$B`, `#013`, and `#%1011`.
+
+- `ORG number` sets the current value of a program counter to the _number_. An attempt to write twice to the same
+  program counter location results in an error. The rules to represent the _number_ as the same as the rules to define
+  the _value_ part of the `EQU` directive.
 
 - `LUT identifier number` defines an _identifier_ that, if encountered within one of the following instructions `NOPO`,
   `JMP`, `RET`, `NOPF`, the assembler will replace it with a provided _number_. The _name_ must be defined within a 
   program as a _label_. See examples in [jmp.asm](mc14500-asm/examples/jmp/jmp.asm), [rtn_jsr.asm](mc14500-asm/examples/rtn/rtn_jsr.asm), [rtn_nopf.asm](mc14500-asm/examples/rtn/rtn_nopf.asm),
   and [rtn_nopo.asm](mc14500-asm/examples/rtn/rtn_nopo.asm).
 
-- `ORG number` sets the current value of a program counter to the _number_. An attempt to write twice to the same
-  program counter location results in an error.
-
-- _`identifier:`_ an identifier followed by a column in the first position in an assembler file line defines a label.
+- `identifier:` an identifier followed by a column as the first word in an assembler file line defines a label.
   Labels are matched against the _identifiers_s defined by `LUT` directives, and the _identifier_ is associated with the
   program counter value at the _label_ location.
 
 #### Lookup Table
 
-If one or more `LUT` pseudo-instructions are encountered the program, for every output it produces, creates an
-additional output file encoding the content of the lookup table in the same format as the original output file. The
-extra output file name has a `_lut` designator before the extension. The exception is the listing file, where no
-additional listing file is produced, but the lookup table is appended to the end of the listing file.
+If one or more `LUT` directives are encountered the program, for every output it produces, creates an additional
+output file encoding the content of the lookup table in the same format as the original output file. The extra
+output file name has a `_lut` designator before the extension. The exception is the assembler listing file `.lst`,
+the lookup table is instead appended to the end of the listing file.
 
 The lookup table size is equal to the size of the io-address space. The locations that were not explicitly defined by
 `LUT` directives have the value `0`.
@@ -912,6 +918,7 @@ Others are my original work.
 
     - [Assembler](mc14500-asm/examples/mif-parser-test)
 
-- __ORG tests__ - tests validating if [mc14500.py](mc14500-asm/mc14500.py) assembler is processing `ORG` directive correctly.
+- __ORG and EQU tests__ - tests validating if [mc14500.py](mc14500-asm/mc14500.py) assembler is processing `ORG` and `EQU` directives 
+  correctly.
 
-    - [Assembler](mc14500-asm/examples/org)
+    - [Assembler](mc14500-asm/examples/org_and_equ_tests)

@@ -11,7 +11,7 @@
 INIT
 
 ; Define signal names for the dice
-STOP    EQU 01
+STOP    EQU     0x01
 
 LD      STOP
 SKZ

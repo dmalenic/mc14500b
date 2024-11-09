@@ -12,12 +12,12 @@
 INIT
 
 ; Define signal names for the latch
-J       EQU 01
-K       EQU 02
-Q       EQU 0A
-CLK     EQU 03
-TEMP    EQU 08
-OLD_CLK EQU 09
+J       EQU 0x01
+K       EQU 0x02
+Q       EQU 0x0A
+CLK     EQU 0x03
+TEMP    EQU 0x08
+OLD_CLK EQU 0x09
 
 ; output state of the flip-flop
 LD      Q

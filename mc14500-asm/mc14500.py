@@ -268,17 +268,40 @@ def is_comment(input_line_or_word):
     """
     return (input_line_or_word.startswith(';') or
             input_line_or_word.startswith('//') or
-            input_line_or_word.startswith('#') or
+            # input_line_or_word.startswith('#') or # this conflicts with the DASM convention for numbers
             input_line_or_word.startswith('*'))
 
 
-def process_identifier(identifier, asm_file_name, line_counter, lst_file):
+def parse_numerical_constant(return_val):
+    # check if it is a number starting with DASM conventions and ending with C conventions
+    if return_val.startswith('#$'):
+        return_val = int(return_val[2:], 16)
+    elif return_val.startswith('#%'):
+        return_val = int(return_val[2:], 2)
+    elif return_val.startswith('#0'):
+        return_val = int(return_val[2:], 8)
+    elif return_val.startswith('#'):
+        return_val = int(return_val[1:], 10)
+    else:
+        # check if it is a number starting with Python conventions
+        try:
+            return_val = int(return_val, 0)
+        except ValueError as e:
+            # check if this is a number starting with C conventions (differes from Python for octal numbers)
+            if return_val.startswith('0'):
+                return_val = int(return_val, 8)
+            else:
+                raise e
+    return return_val
+
+
+def process_io_address(io_address, asm_file_name, line_counter, lst_file):
     """
     Process identifier, usually this goes simple by just looking into the dictionary equals
     and picking the number. However, it can happen that another identifier is found instead
     of a number, therefore the numerical representation of this identifier has to be found.
     This could happen many times so a recursive identifier resolution is needed.
-    :param identifier:
+    :param io_address:
     :param asm_file_name:
     :param line_counter:
     :param lst_file:
@@ -287,28 +310,31 @@ def process_identifier(identifier, asm_file_name, line_counter, lst_file):
     global equals
     global error_counter
 
+    return_val = io_address
+
     # Sometimes is convinient to use as an identifier a valid hex numbers (see 4-bit-latch.asm as an example,
     # where D0 is an identifier). So frist try to resolve an instruction argument as an identifier, and if it fails
     # try to resolve ia as a hex constant.
-    if identifier in equals:
-        io_address = equals[identifier]
-        while io_address[0] in equals:
-            io_address = equals[io_address[0]]
-        try:  # check if a numerical value is there
-            return_val = int(io_address[0], 16)  # convert hex to int
-        except ValueError:
-            # Identifier assigned to other identifier therefore recursive call
-            return_val = process_identifier(io_address[0], asm_file_name, line_counter, lst_file)
+    while return_val in equals:
+        return_val = equals[return_val]
 
-    else:
-        try:  # check if it is a hex number
-            return_val = int(identifier, 16)  # convert hex to int
-        except ValueError:
-            in_string = f"Error: Unknown identifier: '{identifier}' in file '{asm_file_name}'  line {line_counter}."
+    try:
+        return_val = parse_numerical_constant(return_val)
+
+        if return_val not in range(0, 1 << (rom_width - 4)):
+            in_string = (f"Error: io-address out of range: '{io_address}={return_val}' in file '{asm_file_name}'"
+                         f"  line {line_counter}.")
             print(in_string)
             lst_file.write(in_string + os.linesep)
             error_counter += 1
-            return_val = 0  # set it to zero not to crash the program, it is more useful to continue than to stop
+            return_val = 0
+
+    except ValueError:
+        in_string = f"Error: Unknown io_address: '{io_address}={return_val}' in file '{asm_file_name}'  line {line_counter}."
+        print(in_string)
+        lst_file.write(in_string + os.linesep)
+        error_counter += 1
+        return_val = 0  # set it to zero not to crash the program, it is more useful to continue than to stop
 
     return return_val
 
@@ -328,7 +354,7 @@ def process_instruction(inst, io_address, asm, asm_file_name, line_counter, lst_
     global error_counter
 
     # get the numerical representation of the identifier
-    int_io_address = process_identifier(io_address, asm_file_name, line_counter, lst_file)
+    int_io_address = process_io_address(io_address, asm_file_name, line_counter, lst_file)
     data = merge_cmd_io_addr(inst, int_io_address)
     print_cmd(data, asm, lst_file)
     add_command(data, asm_file_name, line_counter, lst_file)
@@ -343,26 +369,6 @@ def process_include_line(include_file_name, lst_file):
     in_string = "Include file closed: " + include_file_name
     print(in_string)
     lst_file.write(in_string + os.linesep)
-
-
-def check_if_hex(identifier, asm_file_name, line_counter, lst_file):
-    """
-    Checks if the identifier is a hex number, if not it raises an error
-    :param identifier:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
-    :return: None
-    """
-    # if hex constant is used as an identifier, then write a warning. It is allowed but not recommended
-    # since it can lead to confusion
-    try:
-        int(identifier, 16)
-        in_string = f"Warning: Hex constant used as an identifier '{identifier}' in file '{asm_file_name}' line {line_counter}."
-        print(in_string)
-        lst_file.write(in_string + os.linesep)
-    except ValueError:
-        pass
 
 
 def process_equals_directive(asm, asm_words, asm_file_name, line_counter, lst_file):
@@ -385,8 +391,7 @@ def process_equals_directive(asm, asm_words, asm_file_name, line_counter, lst_fi
     right = asm_words[2]
 
     if asm_words[1] == 'EQU':
-        check_if_hex(left, asm_file_name, line_counter, lst_file)
-        equals[left] = [right]
+        equals[left] = right
     else:
         in_string = f"Error: Unknown content in file '{asm_file_name} line {line_counter}: {asm}"
         print(in_string)
@@ -506,12 +511,13 @@ def process_asm_file_line(asm_line, asm_words, asm_file_name, line_counter, lst_
         process_label(asm_line, asm_words, lst_file)
     elif asm_words[0] in ['ORG']:
         lst_file.write(asm_line + os.linesep)
-        location = asm_words[1]
-        if location.endswith('H'):
-            # motorola hex format
-            program_counter = int(location[0:-1], 16)
-        else:
-            program_counter = int(asm_words[1])
+        try:
+            program_counter = parse_numerical_constant(asm_words[1])
+        except ValueError:
+            in_string = f"Error: Unknown ORG value: '{asm_words[1]}' in file '{asm_file_name}' line {line_counter}."
+            print(in_string)
+            lst_file.write(in_string + os.linesep)
+            error_counter += 1
     elif asm_words[0] in ['NOPO', 'JMP', 'RTN', 'SKZ', 'NOPF']:
         if len(asm_words) == 1 or is_comment(asm_words[1]):
             process_instruction(instruction[asm_words[0]], '0', asm_line, asm_file_name, line_counter, lst_file)
@@ -546,8 +552,8 @@ def preprocess_asm_line(asm_line):
         if is_comment(asm_words[i]):
             asm_words = asm_words[0:i]
             break
-        elif equals.get(asm_words[i], None) is not None:
-            asm_words[i] = equals[asm_words[i]][0]
+        while equals.get(asm_words[i], None) is not None:
+            asm_words[i] = equals[asm_words[i]]
 
     return asm_words
 
@@ -794,6 +800,24 @@ def dump_rom_to_byte_array():
     return byte_array
 
 
+def export_memory_dump_to_intel_hex_file(outfile, memory_dump):
+    """
+    Exports the assembled data to an intell i8hex file.
+    :param outfile:
+    :param memory_dump:
+    :return:  None
+    """
+    rec_len = 16 if rom_width != 12 else 12
+    with (open(outfile, 'w') as handle_intel_hex_file):
+        for i in range(0, len(memory_dump), rec_len):
+            length = min(rec_len, len(memory_dump) - i)
+            out_string = ":" + BYTE_FMT % length + WORD_FMT % i + "00"
+            out_string += "".join([BYTE_FMT % memory_dump[i + j] for j in range(length)])
+            out_string += BYTE_FMT % (0xFF & (-(sum(memory_dump[i:i + length]) + length + (i // 256) + (i % 256))))
+            handle_intel_hex_file.write(out_string + os.linesep)
+        handle_intel_hex_file.write(":00000001FF" + os.linesep)
+
+
 def process_srec_s1_record(dump, start, length, handle_srec_file, srec_addr_fmt, srec_len_fmt, srec_data_fmt):
     """
     Processes a srec S1 record.
@@ -874,36 +898,52 @@ def export_to_srec_file(asm_file_name):
     rom_dump = dump_rom_to_byte_array()
     outfile = output_file_name(asm_file_name, ".srec")
     export_memory_dump_to_srec_file(outfile, rom_dump)
-    # create srec file
     print("SREC file: ", outfile, "crated")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.srec")
         export_memory_dump_to_srec_file(lut_outfile, lut_dump)
-        # create srec file
         print("SREC file: ", lut_outfile, "crated")
 
 
-def export_to_hex_file(asm_file_name):
+def export_to_intel_hex_file(asm_file_name):
     """
-    Export the assembled data to a hex file.
+    Export the assembled data to an ascii hex file.
     :param asm_file_name:
     :return: None
     """
     rom_dump = dump_rom_to_byte_array()
     outfile = output_file_name(asm_file_name, ".hex")
-
-    with open(outfile, 'w') as handle_out_file:
-        handle_out_file.write(rom_dump.hex().upper())
-        print("Hex file: ", outfile, "crated")
+    export_memory_dump_to_intel_hex_file(outfile, rom_dump)
+    print("Intel HEX file (I8HEX flavor): ", outfile, "crated")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.hex")
+        export_memory_dump_to_intel_hex_file(lut_outfile, lut_dump)
+        print("Intel HEX file (I8HEX flavor): ", lut_outfile, "crated")
+
+
+def export_to_ascii_hex_file(asm_file_name):
+    """
+    Export the assembled data to an ascii hex file.
+    :param asm_file_name:
+    :return: None
+    """
+    rom_dump = dump_rom_to_byte_array()
+    outfile = output_file_name(asm_file_name, ".ascii_hex")
+
+    with open(outfile, 'w') as handle_out_file:
+        handle_out_file.write(rom_dump.hex().upper())
+        print("Ascii hex file: ", outfile, "crated")
+
+    if len(lut) > 0:
+        lut_dump = dump_lut_to_byte_array(asm_file_name)
+        lut_outfile = output_file_name(asm_file_name, "_lut.ascii_hex")
         with open(lut_outfile, 'w') as handle_out_file:
             handle_out_file.write(lut_dump.hex().upper())
-            print("Hex file: ", lut_outfile, "crated")
+            print("Ascii hex file: ", lut_outfile, "crated")
 
 
 def export_to_raw_binary_file(asm_file_name):
@@ -953,28 +993,32 @@ def main():
     global include_directory
 
     parser = argparse.ArgumentParser(
-        usage='%(prog)s [-v] [-h] [-s] [-x] [-b] [-w width] [-d depth] [-I include_directory] [-i instr_position] '
-              '[-n non_programmed_location_value] input_file',
         description='MC14500 Assembler',
         add_help=True)
 
     parser.add_argument('input_file', type=str, help='the input assembler file to be processed')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
-                        help='the width of the ROM in bits (8, 12 or 16)', default=8, choices=[8, 12, 16])
+                        help='the width of the ROM in bits (8, 12 or 16). The default value is 8.', default=8,
+                        choices=[8, 12, 16])
     parser.add_argument('-d', '--depth', type=int,
                         help='the depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to'
-                             ' and including 65536',
+                             ' and including 65536. The default value is 256.',
                         default=256)
     parser.add_argument('-i', '--instr-position', type=str,
-                        help='the position of INS field in a command: first|last, default is last',
+                        help='the position of INS field in a command: first|last. The default value is last.',
                         default='last',
                         choices=['first', 'last'])
     parser.add_argument('-I', '--include', type=str,
                         help='an additonal directory to look for include files beside the current working directory')
-    parser.add_argument('-s', '--srec', action='store_true', help='generate Motorola S-record file')
-    parser.add_argument('-x', '--hex', action='store_true', help='generate HEX file')
-    parser.add_argument('-b', '--binary', action='store_true', help='generate raw binary file')
+    parser.add_argument('-s', '--srec', action='store_true',
+                        help='generate Motorola S-record file (extension .srec)')
+    parser.add_argument('-x', '--hex', action='store_true',
+                        help='generate Intel I8HEX file (extension .hex)')
+    parser.add_argument('-a', '--ascii_hex', action='store_true',
+                        help='generate ASCII HEX file (extension .ascii_hex)')
+    parser.add_argument('-b', '--binary', action='store_true',
+                        help='generate raw binary file (extension .bin)')
     parser.add_argument("-n", "--non-programmed-location-value", type=str, default="0",
                         help='the value that is expected to be present in ROM locations that are not part of program',
                         choices=['0', 'F'])
@@ -986,7 +1030,8 @@ def main():
     max_rom_depth = args.depth
     ins_pos_str = args.instr_position
     generate_srec_file = args.srec
-    generate_hex_file = args.hex
+    generate_ascii_hex_file = args.ascii_hex
+    generate_intel_hex_file = args.hex
     generate_binary_file = args.binary
     non_programmed_location_value_str = args.non_programmed_location_value
     include_directory = args.include
@@ -1046,8 +1091,11 @@ def main():
     if generate_srec_file:
         export_to_srec_file(asm_file_name)
 
-    if generate_hex_file:
-        export_to_hex_file(asm_file_name)
+    if generate_intel_hex_file:
+        export_to_intel_hex_file(asm_file_name)
+
+    if generate_ascii_hex_file:
+        export_to_ascii_hex_file(asm_file_name)
 
     if generate_binary_file:
         export_to_raw_binary_file(asm_file_name)

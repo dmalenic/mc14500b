@@ -18,16 +18,16 @@
 ; ------------------------------------------
 ; Inputs
 ; ------------------------------------------
-RR      EQU     00  Pin RR is wired to input 0
-IN1     EQU     01
-IN2     EQU     02
-IN3     EQU     03
+RR      EQU     0x00  Pin RR is wired to input 0
+IN1     EQU     0x01
+IN2     EQU     0x02
+IN3     EQU     0x03
 
 ; ------------------------------------------
 ; Outputs
 ; ------------------------------------------
-OUT0    EQU     00
-OUT1    EQU     01
+OUT0    EQU     0x00
+OUT1    EQU     0x01
 
 ; ------------------------------------------
 ; Labels

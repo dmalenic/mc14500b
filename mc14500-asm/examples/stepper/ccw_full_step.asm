@@ -30,18 +30,18 @@
 ; ------------------------------------------
 ; Inputs
 ; ------------------------------------------
-RR      EQU 00  ; Pin RR is wired to input 0
+RR      EQU     0x00  ; Pin RR is wired to input 0
 
 ; ------------------------------------------
 ; Outputs
 ; ------------------------------------------
-A       EQU 00
-B       EQU 01
-A_PRIME EQU 02
-B_PRIME EQU 03
-PiN1    EQU B_PRIME
-PiN2    EQU A_PRIME
-PiN3    EQU B
-PiN4    EQU A
+A       EQU     0x00
+B       EQU     0x01
+A_PRIME EQU     0x02
+B_PRIME EQU     0x03
+PiN1    EQU     B_PRIME
+PiN2    EQU     A_PRIME
+PiN3    EQU     B
+PiN4    EQU     A
 
 FULL_STEP

@@ -4,6 +4,7 @@
 *.map
 *.equ
 *.bin
+*.ascii_hex
 *.hex
 *.srec
 *.dis

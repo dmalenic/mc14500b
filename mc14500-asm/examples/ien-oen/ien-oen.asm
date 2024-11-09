@@ -9,18 +9,18 @@
 ; ------------------------------------------
 ; Inputs
 ; ------------------------------------------
-IN1     EQU     01
-IN2     EQU     02
-IN3     EQU     03
-IN4     EQU     04
+IN1     EQU     0x01
+IN2     EQU     0x02
+IN3     EQU     0x03
+IN4     EQU     0x04
 
 ; ------------------------------------------
 ; Outputs
 ; ------------------------------------------
-OUT0    EQU     00
-OUT1    EQU     01
-OUT2    EQU     02
-OUT3    EQU     03
+OUT0    EQU     0x00
+OUT1    EQU     0x01
+OUT2    EQU     0x02
+OUT3    EQU     0x03
 
 IEN IN3
 OEN IN4

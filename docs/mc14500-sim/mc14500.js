@@ -888,6 +888,10 @@ function updateHtml() {
         visualizeSignal(e, null, mpe, write === 1);
     }
     {
+        const e = document.getElementById('write-2');
+        visualizeSignal(e, null, null, write === 1);
+    }
+    {
         const e = document.getElementById('read');
         const mpe = document.getElementById('mp-read');
         visualizeSignal(e, null, mpe, write === 0);
