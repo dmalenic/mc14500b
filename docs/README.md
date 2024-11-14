@@ -12,7 +12,7 @@ The detailed documentation can be found in Project [README](https://github.com/d
 
 ## MC14500 Simulator
 
-For more information, please visit [mc14500b-asm](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
+For more information, please visit [mc14500b-sim](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
 
 The detailed documentation can be found in Project [README](https://github.com/dmalenic/mc14500b/tree/main).
 
