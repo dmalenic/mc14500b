@@ -898,13 +898,13 @@ def export_to_srec_file(asm_file_name):
     rom_dump = dump_rom_to_byte_array()
     outfile = output_file_name(asm_file_name, ".srec")
     export_memory_dump_to_srec_file(outfile, rom_dump)
-    print("SREC file: ", outfile, "crated")
+    print("SREC file: ", outfile, "created")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.srec")
         export_memory_dump_to_srec_file(lut_outfile, lut_dump)
-        print("SREC file: ", lut_outfile, "crated")
+        print("SREC file: ", lut_outfile, "created")
 
 
 def export_to_intel_hex_file(asm_file_name):
@@ -916,13 +916,13 @@ def export_to_intel_hex_file(asm_file_name):
     rom_dump = dump_rom_to_byte_array()
     outfile = output_file_name(asm_file_name, ".hex")
     export_memory_dump_to_intel_hex_file(outfile, rom_dump)
-    print("Intel HEX file (I8HEX flavor): ", outfile, "crated")
+    print("Intel HEX file (I8HEX flavor): ", outfile, "created")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.hex")
         export_memory_dump_to_intel_hex_file(lut_outfile, lut_dump)
-        print("Intel HEX file (I8HEX flavor): ", lut_outfile, "crated")
+        print("Intel HEX file (I8HEX flavor): ", lut_outfile, "created")
 
 
 def export_to_ascii_hex_file(asm_file_name):
@@ -936,14 +936,14 @@ def export_to_ascii_hex_file(asm_file_name):
 
     with open(outfile, 'w') as handle_out_file:
         handle_out_file.write(rom_dump.hex().upper())
-        print("Ascii hex file: ", outfile, "crated")
+        print("Ascii hex file: ", outfile, "created")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.ascii_hex")
         with open(lut_outfile, 'w') as handle_out_file:
             handle_out_file.write(lut_dump.hex().upper())
-            print("Ascii hex file: ", lut_outfile, "crated")
+            print("Ascii hex file: ", lut_outfile, "created")
 
 
 def export_to_raw_binary_file(asm_file_name):
@@ -957,14 +957,14 @@ def export_to_raw_binary_file(asm_file_name):
 
     with open(outfile, 'wb') as handle_out_file:
         handle_out_file.write(rom_dump)
-        print("Binary file: ", outfile, "crated")
+        print("Binary file: ", outfile, "created")
 
     if len(lut) > 0:
         lut_dump = dump_lut_to_byte_array(asm_file_name)
         lut_outfile = output_file_name(asm_file_name, "_lut.bin")
         with open(lut_outfile, 'wb') as handle_out_file:
             handle_out_file.write(lut_dump)
-            print("Binary file: ", lut_outfile, "crated")
+            print("Binary file: ", lut_outfile, "created")
 
 
 def output_file_name(asm_file_name, file_extension):
@@ -996,21 +996,21 @@ def main():
         description='MC14500 Assembler',
         add_help=True)
 
-    parser.add_argument('input_file', type=str, help='the input assembler file to be processed')
+    parser.add_argument('input_file', type=str, help='the input assembler file')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
                         help='the width of the ROM in bits (8, 12 or 16). The default value is 8.', default=8,
                         choices=[8, 12, 16])
     parser.add_argument('-d', '--depth', type=int,
-                        help='the depth of the ROM in bytes, allowed values are positive integer multiples of 128 up to'
-                             ' and including 65536. The default value is 256.',
+                        help='the depth of the ROM in bytes. All positive integer multiples of 128 up to and including'
+                             ' 65536 are allowed. The default value is 256.',
                         default=256)
     parser.add_argument('-i', '--instr-position', type=str,
-                        help='the position of INS field in a command: first|last. The default value is last.',
+                        help='the position of the INS field in a command: first|last. The default value is last.',
                         default='last',
                         choices=['first', 'last'])
     parser.add_argument('-I', '--include', type=str,
-                        help='an additonal directory to look for include files beside the current working directory')
+                        help='an additional directory to look for include files beside the current working directory')
     parser.add_argument('-s', '--srec', action='store_true',
                         help='generate Motorola S-record file (extension .srec)')
     parser.add_argument('-x', '--hex', action='store_true',
@@ -1020,7 +1020,7 @@ def main():
     parser.add_argument('-b', '--binary', action='store_true',
                         help='generate raw binary file (extension .bin)')
     parser.add_argument("-n", "--non-programmed-location-value", type=str, default="0",
-                        help='the value that is expected to be present in ROM locations that are not part of program',
+                        help='the value that is expected to be present in ROM locations that are not part of the program',
                         choices=['0', 'F'])
 
     args = parser.parse_args()
@@ -1041,7 +1041,7 @@ def main():
         non_programmed_location_value = 0xFFFF & ((1 << rom_width) - 1)
 
     print()
-    print("MC14500 Assembler for the ICU 1-bit processor." + os.linesep +
+    print("MC14500B Assembler" + os.linesep +
           "Based on the original work of Urs Lindegger." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
     print("Version " + MC14500_VERSION)
@@ -1049,10 +1049,10 @@ def main():
     print(f"ROM depth: {max_rom_depth} [words]")
     print(f"ROM width: {rom_width} [bits]")
     if ins_pos_str == 'first':
-        print("The 4 most significant bits are the mc14500 instruction op-code")
+        print("The 4 most significant bits are the MC14500B instruction op-code")
     else:
-        print("The 4 least significant bits are the mc14500 instruction op-code")
-    print("the other bits are the io address. This might be different")
+        print("The 4 least significant bits are the MC14500B instruction op-code,")
+    print("and the other bits are the IO-address. This might be different")
     print("on your hardware since it is external to the mc14500 chip.")
     print()
 
@@ -1077,7 +1077,7 @@ def main():
     if error_counter != 0:
         print("Assembler failed with ", error_counter, " error(s)")
         exit(1)
-    print("LST file: ", lst_file, "crated")
+    print("LST file: ", lst_file, "created")
 
     # export to MIF file
     outfile = output_file_name(asm_file_name, ".mif")
@@ -1104,7 +1104,7 @@ def main():
     outfile = output_file_name(asm_file_name, ".map")
     export_map_file(outfile, map_none, map_read, map_write, asm_file_name)
 
-    print("Map file: ", outfile, "crated")
+    print("Map file: ", outfile, "created")
     print("Assembler succeeded")
 
 

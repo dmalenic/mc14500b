@@ -13,7 +13,7 @@ from mc14500util import BYTE_FMT, NIBBLE_FMT, NIBBLE3_FMT, MC14500_VERSION, srec
 # ----------------------------------------------------------------------------------------------------
 
 # (c) 2010 Urs Lindegger
-# (c) 2024 Damir Maleničić
+# (c) 2024 Damir Maleni čić
 
 # ----------------------------------------------------------------------------------------------------
 # Hardware dependent configuration, adjust to match your hardware
@@ -1181,15 +1181,15 @@ def main():
         description='MC14500 Disassembler',
         add_help=True)
 
-    parser.add_argument('input_file', type=str, help='input file nsme. Input file must have extension'
+    parser.add_argument('input_file', type=str, help='input file name. The input file must have extension'
                                                      ' .mif, .srec, .hex, .ascii_hex or .bin')
     parser.add_argument('-o', '--out', type=str, default='',
                         help='OUT is the output file name. The default value is the input file name with appended .dis'
                              ' extension.')
     parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + MC14500_VERSION)
     parser.add_argument('-w', '--width', type=int,
-                        help='the width of the ROM in bits (8, 12 or 16). It is ignored for mif files. '
-                             'The default vaule is 8.',
+                        help='the width of the ROM in bits (8, 12 or 16). It is ignored for MIF files. '
+                             'The default value is 8.',
                         default=8, choices=[8, 12, 16])
     parser.add_argument('-i', '--instr-position', type=str,
                         help='position of INS field in a command: first|last. The default value is last.',
@@ -1204,22 +1204,9 @@ def main():
     rom_cmd_order = cmd_order['ins_' + ins_pos_str]
 
     print()
-    print("MC14500 Disassembler for the ICU 1-bit processor." + os.linesep +
+    print("MC14500B Disassembler" + os.linesep +
           "Based on the original work of Urs Lindegger." + os.linesep +
           "see https://www.linurs.org/mc14500.html")
-    print()
-    print(f"ROM depth: {max_rom_depth} [words]")
-    print(f"ROM width: {rom_width} [bits]")
-    if ins_pos_str == 'first':
-        print("The 4 most significant bits are the mc14500 instruction op-code.")
-    else:
-        print("The 4 least significant bits are the mc14500 instruction op-code")
-    print("Supported input file formats: Motorola S-record in S19-style,")
-    print("                              Memory Initialization File (mif),")
-    print("                              Intel HEX (hex),")
-    print("                              ASCII HEX (ascii_hex),")
-    print("                              raw binary (bin).")
-    print("Version " + MC14500_VERSION)
     print()
 
     # get the asm input file
@@ -1232,7 +1219,7 @@ def main():
 
     # get the disassembler input file
     if not os.access(input_file_name, os.F_OK):
-        print("Input file not found")
+        print(f"Input file {input_file_name} not found")
         exit(1)
 
     output_file_name = args.out
@@ -1260,9 +1247,15 @@ def main():
         case "bin":
             process_bin_file(input_file_name)
         case _:
-            print("Error: Unknown file format.")
-            print("Note:  File format is determined from the file extension.")
-            print("       Supported file formats are: srec, hex, bin.")
+            _, extension = os.path.splitext(input_file_name)
+            print(f"Error: Unsupported input file format {extension}.")
+            print("Note:  The extension determines the input file format.")
+            print("Supported input file formats are:")
+            print("- Memory Initialization File (.mif),")
+            print("- Motorola S-record in S19-style (.srec),")
+            print("- Intel HEX (.hex),")
+            print("- ASCII HEX (.ascii_hex),")
+            print("- raw binary (.bin).")
             print()
             exit(1)
 
@@ -1270,7 +1263,14 @@ def main():
         print("Disassembler failed with", error_counter, " error(s).")
         exit(1)
 
-    print("Size of assembly:", len(rom), "Locations(s) of", rom_width, "bit(s).")
+    print(f"ROM depth: {max_rom_depth} [words]")
+    print(f"ROM width: {rom_width} [bits]")
+    if ins_pos_str == 'first':
+        print("The 4 most significant bits are the MC14500B instruction op-code.")
+    else:
+        print("The 4 least significant bits are the MC14500B instruction op-code.")
+    print("Version " + MC14500_VERSION)
+    print()
     error_counter = export_disassembly_file(input_file_name, output_file_name)
 
     if error_counter != 0:

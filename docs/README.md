@@ -2,21 +2,21 @@
 
 This project modernizes an old [MC 14500B assembler, disassembler, and web-based simulator](https://www.linurs.org/mc14500.html) initially written by [Urs Lindegger](https://www.linurs.org/).
 
-The project is available on [GitHub](https://github.com/dmalenic/mc14500b/)
+The project is available on [GitHub](https://github.com/dmalenic/mc14500b/).
 
 ## MC14500 Assembler and Disassembler
 
-For more information, please visit [mc14500b-asm](https://github.com/dmalenic/mc14500b/tree/main/mc14500-asm).
-
-The detailed documentation can be found in Project [README](https://github.com/dmalenic/mc14500b/tree/main).
+For more information and detailed documentation, please visit [mc14500b-asm](https://github.com/dmalenic/mc14500b/tree/main/mc14500-asm).
 
 ## MC14500 Simulator
 
-For more information, please visit [mc14500b-sim](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
-
-The detailed documentation can be found in Project [README](https://github.com/dmalenic/mc14500b/tree/main).
+For more information and detailed information, please visit [mc14500b-sim](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
 
 You can try the simulator in a [browser](mc14500-sim/index.html).
+
+## MC14500 Example Programs
+
+The documentation of example programs can be found in [README](https://github.com/dmalenic/mc14500b/tree/main/README.md#mc14500-demo-programs).
 
 ## MC14500 Resources
 
@@ -28,7 +28,7 @@ The following related resources were available on 2024-10-21 and may not be avai
 
 - 1978 [Motorola CMOS Integrated Circuits](https://bitsavers.org/components/motorola/_dataBooks/1978_Motorola_CMOS_Data_Book.pdf) Data Book page 358,
 
-- [US Patent 4,153,942](https://patentimages.storage.googleapis.com/4e/ea/42/0ecdf6ebef6592/US4153942.pdf) is Motorola
+- [US Patent 4,153,942](https://patentimages.storage.googleapis.com/4e/ea/42/0ecdf6ebef6592/US4153942.pdf) is Motorola's
   patent for an industrial control processor that describes MC14500 B's internal working,
 
 - [MC14500B Wikipedia Article](https://en.wikipedia.org/wiki/Motorola_MC14500B),
@@ -37,4 +37,4 @@ The following related resources were available on 2024-10-21 and may not be avai
 
 - Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
 
-- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
+- And Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
