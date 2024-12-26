@@ -10,17 +10,17 @@ For more information and detailed documentation, please visit [mc14500b-asm](htt
 
 ## MC14500 Simulator
 
-For more information and detailed information, please visit [mc14500b-sim](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
+For more information and detailed documentation, please visit [mc14500b-sim](https://github.com/dmalenic/mc14500b/tree/main/mc14500-sim).
 
-You can try the simulator in a [browser](mc14500-sim/index.html).
+Try the simulator in a [browser](mc14500-sim/index.html).
 
 ## MC14500 Example Programs
 
-The documentation of example programs can be found in [README](https://github.com/dmalenic/mc14500b/tree/main/README.md#mc14500-demo-programs).
+The documentation for the example programs can be found in [README](https://github.com/dmalenic/mc14500b/tree/main/README.md#mc14500-demo-programs).
 
 ## MC14500 Resources
 
-The following related resources were available on 2024-10-21 and may not be available when you read this:
+The following related resources were available on 2024-10-21:
 
 - [MC14500B Datasheet](https://bitsavers.org/components/motorola/14500/MC14500B_Rev3.pdf),
 

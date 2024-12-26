@@ -8,6 +8,10 @@
     margin: auto;
 }
 
+.docu-link {
+    font-size: 0.8em;
+}
+
 h1 {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 1.5em;
@@ -64,4 +68,8 @@ svg {
     width: 50%;
     height: 100%;
     overflow: auto;
+}
+
+#program-selection {
+    margin-bottom: 5px;
 }
