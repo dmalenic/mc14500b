@@ -20,7 +20,7 @@ The documentation for the example programs can be found in [README](https://gith
 
 ## MC14500 Resources
 
-The following related resources were available on 2024-10-21:
+The following related resources were available on 2025-02-00:
 
 - [MC14500B Datasheet](https://bitsavers.org/components/motorola/14500/MC14500B_Rev3.pdf),
 
@@ -37,4 +37,8 @@ The following related resources were available on 2024-10-21:
 
 - Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
 
-- And Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
+- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page,
+
+- and the Erturk Kocalar's [RetroShield 14500 for Arduino Mega](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/)
+  available on [Tindie 8-Bit-Force](https://www.tindie.com/stores/8bitforce/)
+  
