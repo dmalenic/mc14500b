@@ -54,18 +54,19 @@ RAM6    EQU     0x0E
 RAM7    EQU     0x0F
 
 ; ------------------------------------------------------
-; Creates 1 in RR via RR pin wired back to input 0
-; and then move the 1 as output data it into
-; IEN and OEN to initialize the chip
+; Enable inputs and outputs
 ; ------------------------------------------------------
-ORC     RR
-IEN     RR
-OEN     RR
+ORC     RR          ; force 1 into RR reqardless whether inputs and outputs were enabled
+IEN     RR          ; enable inputs
+OEN     RR          ; enable outputs
 
 ; ------------------------------------------------------
-; If the input IN6 is LOW then user can define the initial state by changing
-; inputs IN1 to IN5. If the input IN6 is HIGH the next state of the cellular
-; automaton is calculated, so the follwing block inputs and outputs are disabled.
+; If the input IN6 is LOW then the program is in the initialization mode i.e.
+; a user can define the initial state by changing inputs IN1 to IN5.
+; If the input IN6 is HIGH then the program is in the calculation mode and
+; the next state of the cellular automaton is calculated.
+; In the calculation mode inputs and outputs should be disabled in the follwing
+; code block.
 ; ------------------------------------------------------
 LDC     IN6
 OEN     RR
@@ -99,28 +100,29 @@ STOC    OUT6
 STOC    RAM7
 STOC    OUT7
 
-; If IN6 was HIGH the input woudld be disabled by the previous block.
-; Therefore it is necessary to enable input and output to test IN6 again
+; If IN6 was HIGH the input was disabled by the previous block.
+; Therefore, it is necessary to enable input and output and test IN6 again
 ; to determine if we are in the initialization or in the calculation mode.
 ORC     RR
 OEN     RR
 IEN     RR
 ; If IN6 is LOW we are in the initialization mode, jump to the beginning
-; to make input more responsive.
+; and skip the rest of the program. This makes the initialization mode more
+; responsive.
 LDC     IN6
 SKZ
 JMP
 
 ; ------------------------------------------------------
-; If this point is reached, inputs and outputs are enabled and the input
-; IN6 is HIGH and we should calculate the next state of the cellular automaton
-; The calculation is done in the rest of code.
+; If this point is reached, we are in calcualtion mode,
+; inputs and outputs are enabled and the input IN6 is HIGH
+; and we should calculate the next state of the cellular automaton.
 ; ------------------------------------------------------
 
 ; ------------------------------------------------------
-; The cellular atomaton state should be updated 3 to 4 times a second for the best
-; visual effect. This is controlled by the timer.
-; If timer is on, then do not proceed with the calculation of the next step,
+; The cellular atomaton state should be updated 3 to 4 times a second to hry
+; the best visual effect. This is controlled by the timer.
+; If timer is on, then do not proceed with the calculation
 ; and jump to the beginning of the program.
 ; ------------------------------------------------------
 LD      IN7
@@ -167,8 +169,8 @@ JMP
 ; ------------------------------------------------------
 
 ; ------------------------------------------------------
-; If this point has been reached we are in the calculation mode
-;  * set RAM bit 7 to 0 so we can keep track in which section of the program are we
+; If this point has been reached we must initialize a next state calculation.
+;  * set RAM bit 7 to 0 to indicate that the calcualtion has not been performed yet.
 ; ------------------------------------------------------
 ORC     RR
 STOC    RAM7
@@ -177,7 +179,7 @@ STOC    RAM7
 ; section 1: f=0, g=0
 ; ------------------------------------------------------
 ;  * input and output are enabled
-;  * keep inputs and outputs enabled if RAM bit 5, 6 and 7 are 0
+;  * keep inputs and outputs enabled only if RAM bit 5, 6 and 7 are 0
 ; ------------------------------------------------------
 LDC     RAM7
 ANDC    RAM5
@@ -243,7 +245,7 @@ OEN     RR
 ; section 2: f=1, g=0
 ; ------------------------------------------------------
 ;  * input and output are enabled
-;  * keep inputs and outputs enabled if RAM bit 6, and 7 are 0 and RAM bit 5 is 1
+;  * keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 5 is 1
 ; ------------------------------------------------------
 LDC     RAM7
 AND     RAM5
@@ -309,7 +311,7 @@ OEN     RR
 ; section 3: f=0, g=1
 ; ------------------------------------------------------
 ;  * input and output are enabled
-;  * keep inputs and outputs enabled if RAM bit 6, and 7 are 0 and RAM bit 6 is 1
+;  * keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 6 is 1
 ; ------------------------------------------------------
 LDC     RAM7
 ANDC    RAM5
@@ -377,7 +379,7 @@ OEN     RR
 ; section 4: f=1, g=1
 ; ------------------------------------------------------
 ;  * input and output are enabled
-;  * keep inputs and outputs enabled if RAM bit 7 is 0 and RAM 5 and 6 are 1
+;  * keep inputs and outputs enabled only if RAM bit 7 is 0 and RAM 5 and 6 are 1
 ; ------------------------------------------------------
 LDC     RAM7
 AND     RAM5
@@ -441,8 +443,8 @@ IEN     RR
 OEN     RR
 
 ; ------------------------------------------------------
-; copy the new state of the automaton from registers RAM0 to RAM6 into output
-; registers OUT0 to OUT6 to make it current
+; copy the new state of the automaton from registers RAM0 to RAM6 into
+; output registers OUT0 to OUT6
 ; ------------------------------------------------------
 LD      RAM0
 STO     OUT0
@@ -460,7 +462,7 @@ LD      RAM6
 STO     OUT6
 
 ; ------------------------------------------------------
-; Start the timer to delay the next state calculation so we can observe the
+; Start the timer to delay the next state calculation and let a user observe the
 ; current of the cellular automaton
 ; ------------------------------------------------------
 ORC     RR
