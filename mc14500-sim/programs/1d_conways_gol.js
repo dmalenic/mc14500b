@@ -29,27 +29,29 @@ const rom = [
     // ;  * A cell dies if it has zero or two live neighbors.
     // ; ------------------------------------------------------
     // ; Operating instructions:
-    // ; 5 bits initial state input, 7 bits automaton output
-    // ;  # Internal state is held in RAM0..RAM6, output is displayed on OUT0..OUT6
-    // ;  # As long as the input IN6 is low the inputs IN1..IN5 are copied to RAM0 to RAM4, RAM5
+    // ;  * 5 inputs define 5 bits of the initial state,
+    // ;  * 7 outputs reflects 7 bits of automaton output,
+    // ;  * Internal state is held in RAM0..RAM6, output is displayed on OUT0..OUT6
+    // ;  * As long as the input IN6 is low the inputs IN1..IN5 are copied to RAM1 to RAM5, RAM0
     // ;    and RAM6 are assumed initially 0. Internal state is reflected on outputs OUT0..OUT6
-    // ;  # As long as the input IN6 is high the next state of the game of life is being continuously
+    // ;  * As long as the input IN6 is high the next state of the game of life is being continuously
     // ;    calculated, and outputs are updated.
     // ; ------------------------------------------------------
 
     // ; ------------------------------------------------------
-    // ; Creates 1 in RR via RR pin wired back to input 0
-    // ; and then move the 1 as output data it into
-    // ; IEN and OEN to initialize the chip
+    // ; Enable inputs and outputs
     // ; ------------------------------------------------------
     0x06,   // ORC RR
     0x0A,   // IEN RR
     0x0B,   // OEN RR
 
     // ; ------------------------------------------------------
-    // ; If the input IN6 is LOW then user can define the initial state by changing
-    // ; inputs IN1 to IN5. If the input IN6 is HIGH the next state of the cellular
-    // ; automaton is calculated, so the following block inputs and outputs are disabled.
+    // ; If the input IN6 is LOW then the program is in the initialization mode i.e.
+    // ; a user can define the initial state by changing inputs IN1 to IN5.
+    // ; If the input IN6 is HIGH then the program is in the calculation mode and
+    // ; the next state of the cellular automaton is calculated.
+    // ; In the calculation mode inputs and outputs should be disabled in the follwing
+    // ; code block.
     // ; ------------------------------------------------------
     0x62,   // LDC   IN6
     0x0B,   // OEN   RR
@@ -57,7 +59,7 @@ const rom = [
 
     // ; ------------------------------------------------------
     // ; To get the immediate visual feedback, the state of IN1 to IN5 is copied
-    // ; to ram RAM0 to RAM4, and to outputs OUT0 to OUT4. OUT5 and OUT6 are set to 0.
+    // ; to ram RAM1 to RAM5, and to outputs OUT1 to OUT5. RAM0, RAM6, OUT0 and OUT6 are set to 0.
     // ; ------------------------------------------------------
     0x11,   // LD    IN1
     0x98,   // STO   RAM1
@@ -83,27 +85,29 @@ const rom = [
     0xF9,   // STOC  RAM7
     0x79,   // STOC  OUT7
 
-    // ; If IN6 was HIGH the input would be disabled by the previous block.
-    // ; Therefore it is necessary to enable input and output to test IN6 again
+    // ; If IN6 was HIGH the input was disabled by the previous block.
+    // ; Therefore, it is necessary to enable input and output and test IN6 again
     // ; to determine if we are in the initialization or in the calculation mode.
     0x06,   // ORC   RR
     0x0B,   // OEN   RR
     0x0A,   // IEN   RR
-    // ; If IN6 is LOW we are in the initialization mode, jump to the beginning.
+    // ; If IN6 is LOW we are in the initialization mode, jump to the beginning
+    // ; and skip the rest of the program. This makes the initialization mode more
+    // ; responsive.
     0x62,   // LDC   IN6
     0x0E,   // SKZ   x
     0x0C,   // JMP   x
 
     // ; ------------------------------------------------------
-    // ; If this point is reached, inputs and outputs are enabled and the input
-    // ; IN6 is HIGH and we should calculate the next state of the cellular automaton
-    // ; The calculation is done in the rest of code.
+    // ; If this point is reached, we are in the calcualtion mode,
+    // ; inputs and outputs are enabled and the input IN6 is HIGH
+    // ; and we should calculate the next state of the cellular automaton.
     // ; ------------------------------------------------------
 
     // ; ------------------------------------------------------
-    // ; The cellular automaton state should be updated 3 to 4 times a second for the best
-    // ; visual effect. This is controlled by the timer.
-    // ; If timer is on, then do not proceed with the calculation of the next step,
+    // ; The cellular atomaton state should be updated 3 to 4 times a second to get
+    // ; the best visual effect. This is controlled by the timer.
+    // ; If timer is on, then do not proceed with the calculation
     // ; and jump to the beginning of the program.
     // ; ------------------------------------------------------
     0x71,   // LD    IN7
@@ -115,44 +119,43 @@ const rom = [
     // ; ------------------------------------------------------
     // ; 3 bits of the internal state are required to calculate the next state. As we have only 8 bits
     // ; available, and the internal state requires 7 bits, the last two bits of the internal
-    // ; state that would normally be held in RAM5 and RAM6 are made implicit using the following
+    // ; state that would normally be held in RAM5 and RAM6 are made implicite using the following
     // ; strategy:
-    // ; - the program is divided into 4 similar sections:
-    // ; - depending on the state of RAM5 or RAM6 the section has inputs or outputs either
-    // ;   enabled or disabled. If it has inputs and outputs enabled, its code can take into the
-    // ;   account the state of RAM5 and RAM6 implicitly, and is free to use those registers as
-    // ;   temporary storage for calculation of the new state. At the end of the calculation
-    // ;   RAM5 and RAM6 are set to the new state and the section is marked as done by setting
-    // ;   the section sets RAM7 to 1 to indicate that the calculation has been performed and
-    // ;   he following sections will have inputs and output disabled.
-    // ; - section 1 calculates the next state if RAM bit 5 and 6 are both 0
-    // ; - section 2 calculates the next state if RAM bit 5 is 0 and bit 6 is 1
-    // ; - section 3 calculates the next state if RAM bit 5 is 1 and bit 6 is 0
-    // ; - section 4 calculates the next state if RAM bit 5 and 6 are both 1
-    // ; For the readability, the algorithm describing the calculation of the next state uses
+    // ;  * the program is divided into 4 similar sections:
+    // ;  * depending on the state of RAM5 or RAM6 the section has inputs and outptu eeither
+    // ;    enabled or disabled. If it has inputs and outputs enabled, its code takes into the
+    // ;    account the state of RAM5 and RAM6 implictely and is free to use those locations as
+    // ;    temporary storage while calculating the new state. At the end of the calculation,
+    // ;    RAM0 to RAM6 hold the new state, and the calculation is marked as done by setting
+    // ;    the RAM7 to 1. The following sections will have inputs and outptu disabled.
+    // ;  * section 1 calculates the next state if RAM bits 5 and 6 are both 0
+    // ;  * section 2 calculates the next state if RAM bits 5 is 0 and bit 6 is 1
+    // ;  * section 3 calculates the next state if RAM bits 5 is 1 and bit 6 is 0
+    // ;  * section 4 calculates the next state if RAM bits 5 and 6 are both 1
+    // ; The comments describint the algorithm that calculates the next state use
     // ; the following notation:
-    // ; - a denotes a state of bit 0, initially and finally in RAM0
-    // ; - b denotes a state of bit 1, initially and finally in RAM1
-    // ; - c denotes a state of bit 2, initially and finally in RAM2
-    // ; - d denotes a state of bit 3, initially and finally in RAM3
-    // ; - e denotes a state of bit 4, initially and finally in RAM4
-    // ; - f denotes state of bit 5, initially and finally in RAM5
-    // ; - g denotes a state of bit 7, initially and finally in RAM6
-    // ; - x denotes, don't care
-    // ; - 1 or 0 denotes the constant value in a given RAM bit
-    // ; - the new (changed) state of a bit is denoted using a', b', etc.
-    // ; - for example:
-    // ;   - the sequence a b c d e b 0 x is interpreted as
-    // ;     a in RAM0, b in RAM1, c in RAM2, d in RAM3, e in RAM4, b in RAM5, 0 in RAM6,
-    // ;     x in RAM7 is don't care
-    // ;   - the transformation a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d is interpreted as
-    // ;     change state of c in RAM2 to c', by exoring the previous state of b in RAM6
-    // ;     with current state of d in RAM3
+    // ;  * a denotes a state of bit 0, initally and finally in RAM0
+    // ;  * b denotes a state of bit 1, initally and finally in RAM1
+    // ;  * c denotes a state of bit 2, initally and finally in RAM2
+    // ;  * d denotes a state of bit 3, initally and finally in RAM3
+    // ;  * e denotes a state of bit 4, initally and finally in RAM4
+    // ;  * f denotes state of bit 5, initally and finally in RAM5
+    // ;  * g denotes a state of bit 7, initally and finally in RAM6
+    // ;  * x denotes, don't care
+    // ;  * 1 or 0 denotes the constant value in a given RAM bit
+    // ;  * the new (changed) state of a bit is denoted using a', b', etc.
+    // ;  * for example:
+    // ;     * the sequnce a' b c d e b 0 x is interpreted as
+    // ;       a' in RAM0, b in RAM1, c in RAM2, d in RAM3, e in RAM4, b in RAM5, 0 in RAM6,
+    // ;       x in RAM7 is don't care
+    // ;     * the transformation a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d is interpreted as
+    // ;       changing the state c in RAM2 to c', by exoring the current state of b in RAM6
+    // ;       with the new state of d in RAM3
     // ; ------------------------------------------------------
 
     // ; ------------------------------------------------------
-    // ; If this point has been reached we are in calculation mode:
-    // ; - set RAM bit 7 to 0 so we can keep track in which section of the program are we
+    // ; If this point has been reached we must initialize a next state calculation.
+    // ;  * set RAM bit 7 to 0 to indicate that the calcualtion has not been performed yet.
     // ; ------------------------------------------------------
     0x06,   // ORC   RR
     0xF9,   // STOC  RAM7
@@ -161,7 +164,7 @@ const rom = [
     // ; section 1: f=0, g=0
     // ; ------------------------------------------------------
     // ; - input and output are enabled
-    // ; - keep inputs and outputs enabled if RAM bit 5, 6 and 7 are 0
+    // ; - keep inputs and outputs enabled only if RAM bit 5, 6 and 7 are 0
     // ; ------------------------------------------------------
     0xF2,   // LDC   RAM7
     0xD4,   // ANDC  RAM5
@@ -227,7 +230,7 @@ const rom = [
     // ; section 2: f=1, g=0
     // ; ------------------------------------------------------
     // ; - input and output are enabled
-    // ; - keep inputs and outputs enabled if RAM bit 6, and 7 are 0 and RAM bit 5 is 1
+    // ; - keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 5 is 1
     // ; ------------------------------------------------------
     0xF2,   // LDC   RAM7
     0xD3,   // AND   RAM5
@@ -293,7 +296,7 @@ const rom = [
     // ; section 3: f=0, g=1
     // ; ------------------------------------------------------
     // ; - input and output are enabled
-    // ; - keep inputs and outputs enabled if RAM bit 6, and 7 are 0 and RAM bit 6 is 1
+    // ; - keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 6 is 1
     // ; ------------------------------------------------------
     0xF2,   // LDC   RAM7
     0xD4,   // ANDC  RAM5
@@ -361,7 +364,7 @@ const rom = [
     // ; section 4: f=1, g=1
     // ; ------------------------------------------------------
     // ; - input and output are enabled
-    // ; - keep inputs and outputs enabled if RAM bit 7 is 0 and RAM 5 and 6 are 1
+    // ; - keep inputs and outputs enabled only if RAM bit 7 is 0 and RAM 5 and 6 are 1
     // ; ------------------------------------------------------
     0xF2,   // LDC   RAM7
     0xD3,   // AND   RAM5
@@ -425,8 +428,8 @@ const rom = [
     0x0B,   // OEN   RR
 
     // ; ------------------------------------------------------
-    // ; copy the new state of the automaton from registers RAM0 to RAM6 into output
-    // ; registers OUT0 to OUT6 to make it current
+    // ; copy the new state of the automaton from registers RAM0 to RAM6 into
+    // ; output registers OUT0 to OUT6
     // ; ------------------------------------------------------
     0x81,   // LD    RAM0
     0x08,   // STO   OUT0
@@ -444,7 +447,7 @@ const rom = [
     0x68,   // STO   OUT6
 
     // ; ------------------------------------------------------
-    // ; Start the timer to delay the next state calculation so we can observe the
+    // ; Start the timer to delay the next state calculation and let the user observe the
     // ; current of the cellular automaton
     // ; ------------------------------------------------------
     0x06,   // ORC   RR

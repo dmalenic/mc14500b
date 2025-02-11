@@ -74,7 +74,7 @@ IEN     RR
 
 ; ------------------------------------------------------
 ; To get the immediate visual feedback, the state of IN1 to IN5 is copied
-; to ram RAM0 to RAM4, and to outputs OUT0 to OUT4. OUT5 and OUT6 are set to 0.
+; to ram RAM1 to RAM5, and to outputs OUT1 to OUT5. RAM0, RAM6, OUT0 and OUT6 are set to 0.
 ; ------------------------------------------------------
 LD      IN1
 STO     RAM1
@@ -114,13 +114,13 @@ SKZ
 JMP
 
 ; ------------------------------------------------------
-; If this point is reached, we are in calcualtion mode,
+; If this point is reached, we are in the calcualtion mode,
 ; inputs and outputs are enabled and the input IN6 is HIGH
 ; and we should calculate the next state of the cellular automaton.
 ; ------------------------------------------------------
 
 ; ------------------------------------------------------
-; The cellular atomaton state should be updated 3 to 4 times a second to hry
+; The cellular atomaton state should be updated 3 to 4 times a second to get
 ; the best visual effect. This is controlled by the timer.
 ; If timer is on, then do not proceed with the calculation
 ; and jump to the beginning of the program.
