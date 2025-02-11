@@ -4,9 +4,10 @@
 ;  * A cell dies if it has zero or two live neighbors.
 ; ------------------------------------------------------
 ; Operating instructions:
-; 5 bits initial state input, 7 bits automaton output
+;  * 5 inputs define 5 bits of the initial state,
+;  * 7 outputs reflects 7 bits of automaton output,
 ;  * Internal state is held in RAM0..RAM6, output is displayed on OUT0..OUT6
-;  * As long as the input IN6 is low the inputs IN1..IN5 are copied to RAM1 to RAM4, RAM0
+;  * As long as the input IN6 is low the inputs IN1..IN5 are copied to RAM1 to RAM5, RAM0
 ;    and RAM6 are assumed initially 0. Internal state is reflected on outputs OUT0..OUT6
 ;  * As long as the input IN6 is high the next state of the game of life is being continuously
 ;    calculated, and outputs are updated.
@@ -134,18 +135,17 @@ JMP
 ; state that would normally be held in RAM5 and RAM6 are made implicite using the following
 ; strategy:
 ;  * the program is divided into 4 similar sections:
-;  * depending on the state of RAM5 or RAM6 the section has inputs or outptu eeither
-;    enabled or disabled. If it has inputs and outputs enabled, its code can take into the
-;    account the state of RAM5 and RAM6 implictely ans is fre to use those registers as
-;    temporary storage for calculation of the new state. At the end of the calculation
-;    RAM5 and RAM6 are set to the new state and the section is marked as done by setting
-;    the section sets RAM7 to 1 to indicate that the calculation has been performed and
-;    the following sections will have inputs and outptu disabled.
-;  * section 1 calculates the next state if RAM bit 5 and 6 are both 0
-;  * section 2 calculates the next state if RAM bit 5 is 0 and bit 6 is 1
-;  * section 3 calculates the next state if RAM bit 5 is 1 and bit 6 is 0
-;  * section 4 calculates the next state if RAM bit 5 and 6 are both 1
-; For the readibility, the algorithm describing the calculation of the next state uses
+;  * depending on the state of RAM5 or RAM6 the section has inputs and outptu eeither
+;    enabled or disabled. If it has inputs and outputs enabled, its code takes into the
+;    account the state of RAM5 and RAM6 implictely and is free to use those locations as
+;    temporary storage while calculating the new state. At the end of the calculation,
+;    RAM0 to RAM6 hold the new state, and the calculation is marked as done by setting
+;    the RAM7 to 1. The following sections will have inputs and outptu disabled.
+;  * section 1 calculates the next state if RAM bits 5 and 6 are both 0
+;  * section 2 calculates the next state if RAM bits 5 is 0 and bit 6 is 1
+;  * section 3 calculates the next state if RAM bits 5 is 1 and bit 6 is 0
+;  * section 4 calculates the next state if RAM bits 5 and 6 are both 1
+; The comments describint the algorithm that calculates the next state use
 ; the following notation:
 ;  * a denotes a state of bit 0, initally and finally in RAM0
 ;  * b denotes a state of bit 1, initally and finally in RAM1
@@ -156,18 +156,18 @@ JMP
 ;  * g denotes a state of bit 7, initally and finally in RAM6
 ;  * x denotes, don't care
 ;  * 1 or 0 denotes the constant value in a given RAM bit
-;  * the new (chaged) state of a bit is denoted using a', b', etc.
+;  * the new (changed) state of a bit is denoted using a', b', etc.
 ;  * for example:
-;     * the sequnce a b c d e b 0 x is interpreted as
-;       a in RAM0, b in RAM1, c in RAM2, d in RAM3, e in RAM4, b in RAM5, 0 in RAM6,
+;     * the sequnce a' b c d e b 0 x is interpreted as
+;       a' in RAM0, b in RAM1, c in RAM2, d in RAM3, e in RAM4, b in RAM5, 0 in RAM6,
 ;       x in RAM7 is don't care
-;     * the transormatoin a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d is interpreted as
-;       change state of c in RAM2 to c', by exoring the previos state of b in RAM6
-;       with current state of d in RAM3
+;     * the transformation a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d is interpreted as
+;       changing the state c in RAM2 to c', by exoring the current state of b in RAM6
+;       with the new state of d in RAM3
 ; ------------------------------------------------------
 
 ; ------------------------------------------------------
-; If this point has been reached we are in calculation mode
+; If this point has been reached we are in the calculation mode
 ;  * set RAM bit 7 to 0 so we can keep track in which section of the program are we
 ; ------------------------------------------------------
 ORC     RR
