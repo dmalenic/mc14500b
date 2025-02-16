@@ -8,7 +8,7 @@ import {pgmInitCurrentProgram} from '../programs.js';
 export function initToGray(programSelector) {
     pgmInitCurrentProgram(programSelector, `Convert binary to Gray code`,
         `&nbsp;Converts 7-bit binary to Gray code.<br/>
-        &nbsp;Only 7 bits can be converted because RR is connected to IN0.<br/>
+        &nbsp;Maximum 7 bits can be converted because RR is connected to IN0.<br/>
         &nbsp;Use inputs IN7 to IN1 to provide the 7 bit binary input.<br/>
         &nbsp;The result is shown in outputs OUT6 to OUT0. OUT7 is always 0.<br/>
         &nbsp;`,
@@ -17,7 +17,7 @@ export function initToGray(programSelector) {
 
 
 /**
- * Running lights program ROM content
+ * `to-gray` program ROM content.
  * @type {number[]}
  */
 // noinspection SpellCheckingInspection

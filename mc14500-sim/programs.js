@@ -29,6 +29,7 @@ import {init4BitComparator} from './programs/4_bit_comparator.js';
 import {init8BitLfsr} from './programs/8_bit_lfsr.js';
 import {initFromGray} from "./programs/from-gray.js";
 import {initToGray} from "./programs/to-gray.js";
+import {initPalindrome} from "./programs/palindrome.js";
 
 
 /**
@@ -94,6 +95,7 @@ export function pgmInjectProgramSelection() {
     initStepperCwHalfStep(programListLeft);
     initToGray(programListLeft);
     initFromGray(programListLeft);
+    initPalindrome(programListLeft);
 
     initNot(programListRight);
     initAnd(programListRight);

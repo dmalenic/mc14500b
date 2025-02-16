@@ -352,18 +352,22 @@ Others are my original work.
 
     - [Simulator - shows rotation in a clockwise direction](mc14500-sim/programs/stepper_cw_half_step.js).
 
-- __Convert binary to Gray code__: This program converts 7-bit binary to Gray code. Only 7 bits can be converted 
-  because RR is connected to IN0.
+- __Convert binary to Gray code__: This program converts 7-bit binary to Gray code.
 
     - [Assembler](mc14500-asm/examples/gray-code/to-gray.asm)
     - [Simulator](mc14500-sim/programs/to-gray.js)
 
-- __Convert Gray code to binary__: This program converts 7-bit Gray code to binary. Only 7 bits can be converted
-  because RR is connected to IN0.
+- __Convert Gray code to binary__: This program converts 7-bit Gray code to binary.
 
     - [Assembler](mc14500-asm/examples/gray-code/from-gray.asm)
 
     - [Simulator](mc14500-sim/programs/from-gray.js)
+
+- __Palindrome__: This program tests if binary string is a palindrome.
+
+    - [Assembler](mc14500-asm/examples/palindrome/palindrome.asm)
+
+    - [Simulator](mc14500-sim/programs/palindrome.js)
 
 - __Logical NOT Gate__: This program demonstrates the implementation of the logical NOT gate using MC14500B assembler
   code. It is adapted from MC14500B Industrial Control Unit Handbook.
