@@ -270,7 +270,7 @@ x^8 + x^6 + x^5 + x^4 + 1
 Some of the following demo programs are taken from the [MC14500B Industrial Control Unit Handbook](https://bitsavers.org/components/motorola/14500/MC14500B_Industrial_Control_Unit_Handbook_1977.pdf),
 or they are a combination of examples from the book.
 
-Few are adapted from the programs provided with the original [MC14500B Simulator](https://www.linurs.org/index.html).
+Few are adapted from the programs provided with the original Urs Lindegger's [MC14500B Simulator](https://www.linurs.org/index.html).
 
 Others are my original work.
 
@@ -351,6 +351,19 @@ Others are my original work.
     - [Assembler - shows rotation in a counter-clockwise direction](mc14500-asm/examples/stepper/ccw_half_step.asm),
 
     - [Simulator - shows rotation in a clockwise direction](mc14500-sim/programs/stepper_cw_half_step.js).
+
+- __Convert binary to Gray code__: This program converts 7-bit binary to Gray code. Only 7 bits can be converted 
+  because RR is connected to IN0.
+
+    - [Assembler](mc14500-asm/examples/gray-code/to-gray.asm)
+    - [Simulator](mc14500-sim/programs/to-gray.js)
+
+- __Convert Gray code to binary__: This program converts 7-bit Gray code to binary. Only 7 bits can be converted
+  because RR is connected to IN0.
+
+    - [Assembler](mc14500-asm/examples/gray-code/from-gray.asm)
+
+    - [Simulator](mc14500-sim/programs/from-gray.js)
 
 - __Logical NOT Gate__: This program demonstrates the implementation of the logical NOT gate using MC14500B assembler
   code. It is adapted from MC14500B Industrial Control Unit Handbook.

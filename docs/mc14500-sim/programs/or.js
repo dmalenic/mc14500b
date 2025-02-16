@@ -5,7 +5,7 @@ export function initOr(programSelector) {
     pgmInitCurrentProgram(programSelector, `Logical OR Gate`,
         `This program simulates a logical OR gate.<br/>
         Use inputs 1 and 2 to supply the input values to the gate.<br/>
-        The result of the OR logical operation is shown at output 0.<br/>
+        The result of the OR logical operation is provided in output 0.<br/>
         &nbsp;<br/>
         &nbsp;`,
         rom, 0);

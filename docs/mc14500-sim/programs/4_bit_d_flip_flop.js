@@ -6,7 +6,7 @@ export function init4BitDFlipFlopRegister(programSelector) {
         `This program simulates a 4-bit D-flip-flop circuit.<br/>
         Flip-flop inputs D0-D3 are controlled by inputs 1 to 4.<br/>
         Input 5 controls the CLOCK signal.<br/>
-        The flip-flop outputs Q0-Q3 are shown at outputs 0 to 3.<br/>&nbsp;`,
+        The flip-flop outputs Q0-Q3 are shown in outputs 0 to 3.<br/>&nbsp;`,
         rom, 0);
 }
 

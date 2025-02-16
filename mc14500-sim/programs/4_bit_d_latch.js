@@ -6,7 +6,7 @@ export function init4BitDLatchRegister(programSelector) {
         `This program simulates a 4-bit D-latch circuit.<br/>
         Latch inputs D0-D3 are controlled by inputs 1 to 4.<br/>
         Input 5 controls the CLOCK signal.<br/>
-        The latch outputs Q0-Q3 are shown at outputs 0 to 3.<br/>&nbsp;`,
+        The latch outputs Q0-Q3 are provided in outputs 0 to 3.<br/>&nbsp;`,
         rom, 0);
 }
 

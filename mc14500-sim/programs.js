@@ -27,6 +27,8 @@ import {init4BitDLatchRegister} from './programs/4_bit_d_latch.js';
 import {init4BitFullAdder} from './programs/4_bit_adder.js';
 import {init4BitComparator} from './programs/4_bit_comparator.js';
 import {init8BitLfsr} from './programs/8_bit_lfsr.js';
+import {initFromGray} from "./programs/from-gray.js";
+import {initToGray} from "./programs/to-gray.js";
 
 
 /**
@@ -90,6 +92,8 @@ export function pgmInjectProgramSelection() {
     initStepperCwWave(programListLeft);
     initStepperCwFullStep(programListLeft);
     initStepperCwHalfStep(programListLeft);
+    initToGray(programListLeft);
+    initFromGray(programListLeft);
 
     initNot(programListRight);
     initAnd(programListRight);

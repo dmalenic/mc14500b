@@ -5,7 +5,7 @@ export function initXnor(programSelector) {
     pgmInitCurrentProgram(programSelector, 'Logical XNOR Gate',
         `This program simulates a logical XNOR gate.<br/>
         Use inputs 1 and 2 to supply the input values to the gate.<br/>
-        The result of the XNOR logical operation is shown at output 0.<br/>
+        The result of the XNOR logical operation is provided in output 0.<br/>
         &nbsp;<br/>
         &nbsp;`,
         rom, 0);
