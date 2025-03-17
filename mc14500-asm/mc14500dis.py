@@ -59,9 +59,9 @@ instruction = {0: 'NOPO',
 
 def to_hex_io_address(io_address, rom_width_):
     """
-    Converts an io address as hex string with length depending on the rom width
-    :param io_address:
-    :param rom_width_:
+    Converts an io address as hex string with length depending on the rom width.
+    :param io_address: IO address,
+    :param rom_width_: ROM width,
     :return: io address as hex string
     """
     if rom_width_ == 8:
@@ -75,8 +75,8 @@ def to_hex_io_address(io_address, rom_width_):
 
 def process_srec_file(input_file):
     """
-    Reads the Motorola S record file and writes the contents to the ROM
-    :param input_file:
+    Reads the Motorola S record file and writes the contents to the ROM.
+    :param input_file: The name of the input file,
     :return: None
     """
     global rom
@@ -126,9 +126,9 @@ def process_srec_file(input_file):
         rom += [rom_entry]
         address += 1
 
-    # sort the memory and check if certain memory locations are written more than once e.g., due to conflicting orgs
+    # sort the memory and check if certain memory locations are written more than once, e.g., due to conflicting orgs
     rom.sort()
-    old_pc = -1  # dummy value that can not be equal to an unsigned address
+    old_pc = -1  # A dummy value that cannot be equal to an unsigned address
     for i in range(len(rom)):
         if rom[i][0] == old_pc:
             print("Error: More than once data assigned to ROM address: %4.4x." % rom[i][0])
@@ -138,8 +138,8 @@ def process_srec_file(input_file):
 
 def validate_i8hex_checksum(i8hex_line):
     """
-    Validates the checksum of an Intel i8hex line
-    :param i8hex_line:
+    Validates the checksum of an Intel i8hex line.
+    :param i8hex_line: The line to validate,
     :return: True if the checksum is valid, False otherwise
     """
     return (sum([int(i8hex_line[i:i + 2], 16) for i in range(0, len(i8hex_line), 2)]) & 0xFF) == 0
@@ -147,10 +147,10 @@ def validate_i8hex_checksum(i8hex_line):
 
 def parse_i8hex_line(line, line_no, input_file):
     """
-    Parses an Intel i8hex line, split at the colon and validates the checksum
-    :param line:
-    :param line_no:
-    :param input_file:
+    Parses an Intel i8hex line, split at the colon and validates the checksum.
+    :param line: The line to parse,
+    :param line_no: the line number,
+    :param input_file: The name of the input file,
     :return: part after column without checkum, None if an error occurs
     """
     global error_counter
@@ -167,7 +167,7 @@ def parse_i8hex_line(line, line_no, input_file):
         print(f"Error: I8HEX format, record contains multiple ':' charactes in file {input_file} at line {line_no}")
         error_counter += 1
 
-    # everytning before ':' is treated as comment and can be ignored
+    # everytning before ':' is treated as a comment and can be ignored
 
     if not validate_i8hex_checksum(parts[1]):
         print(f"Error: in file {input_file} at line {line_no}, I8HEX format,  invalid Intel i8hex checksum value.")
@@ -186,8 +186,8 @@ def parse_i8hex_line(line, line_no, input_file):
 
 def process_intel_hex_file(input_file):
     """
-    Reads the Intel i8hex file and writes the contents to the ROM
-    :param input_file:
+    Reads the Intel i8hex file and writes the contents to the ROM.
+    :param input_file: The name of the input file,
     :return: None
     """
     global rom
@@ -247,8 +247,8 @@ def process_intel_hex_file(input_file):
 
 def process_ascii_hex_file(input_file):
     """
-    Reads the ascii hex file and writes the contents to the ROM
-    :param input_file:
+    Reads the ascii hex file and writes the contents to the ROM.
+    :param input_file: The name of the input file,
     :return: None
     """
     global rom
@@ -293,8 +293,8 @@ def process_ascii_hex_file(input_file):
 
 def process_bin_file(input_file):
     """
-    Reads the raw binary file and writes the contents to the ROM
-    :param input_file:
+    Reads the raw binary file and writes the contents to the ROM.
+    :param input_file: The name of the input file,
     :return: None
     """
     global rom
@@ -336,10 +336,10 @@ def process_bin_file(input_file):
 def write_disassembled_rom_location(inst, hex_io_address, handle_asm_file):
     """
     Converts the instruction code to the corresponding assembly mnemonic and writes it together with the io address to the
-    disassembly file. If the instruction code is unknown, an error message is printed and error counter is incremented.
-    :param inst:
-    :param hex_io_address:
-    :param handle_asm_file:
+    disassembly file. If the instruction code is unknown, an error message is printed and the error counter is incremented.
+    :param inst: 4-bit instruction code,
+    :param hex_io_address: io address as hex string,
+    :param handle_asm_file: file handle to the disassembly file,
     :return: error counter
     """
     global error_counter
@@ -357,8 +357,8 @@ def write_disassembled_rom_location(inst, hex_io_address, handle_asm_file):
 
 def process_rom_location(addr):
     """
-    Extracts the instruction and the io address information from the ROM location at address addr
-    :param addr: ROM address
+    Extracts the instruction and the io address information from the ROM location at address addr.
+    :param addr: ROM address,
     :return: instruction and io address
     """
     global rom
@@ -393,9 +393,9 @@ def process_rom_location(addr):
 
 def export_disassembly_file(input_file_name, output_file_name):
     """
-    Creates and writes the disassembly file
-    :param input_file_name:
-    :param output_file_name:
+    Creates and writes the disassembly file.
+    :param input_file_name: The name of the input file,
+    :param output_file_name: the name of the output file,
     :return: number of encountered errors
     """
     global error_counter
@@ -437,7 +437,7 @@ def mif_remove_comments(tokens):
     """
     Removes comments from the result of MIF file tokenization, but preserve the newline tokens
     evenn in comments so that the line number can be correctly reported in error messages.
-    :param tokens:
+    :param tokens: List of tokens,
     :return: list of tokens without tokens in comments
     """
     class State(Enum):
@@ -473,8 +473,8 @@ def mif_remove_comments(tokens):
 
 def mif_tokenize(mif_file_content):
     """
-    Tokenizes the MIF file content and remove comments but preserve newline tokens even in comments
-    :param mif_file_content:
+    Tokenizes the MIF file content and remove comments but preserve newline tokens even in comments.
+    :param mif_file_content: The content of the MIF file,
     :return: list of tokens
     """
     symbols = [';', ':', '%', '[', ']', os.linesep]
@@ -510,8 +510,8 @@ def mif_tokenize(mif_file_content):
 def mif_consume_till_end_of_line(tokens, line_number):
     """
     Consumes the rest of the line. This is error recovery.
-    :param tokens:
-    :param line_number:
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: tokens, line number
     """
     while tokens:
@@ -528,9 +528,9 @@ def mif_consume_till_end_of_line(tokens, line_number):
 
 def mif_consume_multiline_comment(tokens, line_number):
     """
-    Consumes a multiline comment from the MIF file
-    :param tokens:
-    :param line_number:
+    Consumes a multiline comment from the MIF file.
+    :param tokens: The list of tokens,
+    :param line_number: the current line number,
     :return: tokens, line number
     """
     while tokens:
@@ -544,22 +544,22 @@ def mif_consume_multiline_comment(tokens, line_number):
     return tokens, line_number
 
 
-def mif_consume_singleline_comment(param, line_number):
+def mif_consume_singleline_comment(tokens, line_number):
     """
-    Consumes a single line comment from the MIF file    
-    :param param: 
-    :param line_number: 
+    Consumes a single line comment from the MIF file.
+    :param tokens: The list of tokens,
+    :param line_number: the current line number,
     :return: tokens, line number
     """""
-    return mif_consume_till_end_of_line(param, line_number)
+    return mif_consume_till_end_of_line(tokens, line_number)
 
 
 def mif_match_begin(tokens, line_number):
     """
-    Matches the BEGIN token in the MIF file
-    :param tokens:
-    :param line_number:
-    :return:
+    Matches the BEGIN token in the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
+    :return: the indicator if the BEGIN token was found, remaining tokens, line number
     """
     global error_counter
 
@@ -585,9 +585,9 @@ def mif_match_begin(tokens, line_number):
 
 def mif_match_semicolumn(tokens, line_number):
     """
-    Matches the ';' token in the MIF file
-    :param tokens:
-    :param line_number:
+    Matches the ';' token in the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: success indicator, remaining tokens, line number
     """
     global error_counter
@@ -613,9 +613,9 @@ def mif_match_semicolumn(tokens, line_number):
 
 def mif_match_column(tokens, line_number):
     """
-    Matches the ':' token in the MIF file
-    :param tokens:
-    :param line_number:
+    Matches the ':' token in the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: success indicator, remaining tokens, line number
     """
     global error_counter
@@ -641,9 +641,9 @@ def mif_match_column(tokens, line_number):
 
 def mif_match_equals(tokens, line_number):
     """
-    Matches the '=' token in the MIF file
-    :param tokens:
-    :param line_number:
+    Matches the '=' token in the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: success indicator, remaining tokens, line number
     """
     global error_counter
@@ -669,10 +669,10 @@ def mif_match_equals(tokens, line_number):
 
 def mif_match_numerical_value(tokens, radix, line_number):
     """
-    Matches a decimal value in the MIF file
-    :param tokens:
-    :param radix:
-    :param line_number:
+    Matches a decimal value in the MIF file.
+    :param tokens: List of tokens,
+    :param radix: radix used to encode the numerical values,
+    :param line_number: the current line number,
     :return: value, remaining tokens, line number
     """
     global error_counter
@@ -709,9 +709,9 @@ def mif_match_numerical_value(tokens, radix, line_number):
 
 def mif_width_value(tokens, line_number):
     """
-    Parses the WIDTH value of the MIF file
-    :param tokens:
-    :param line_number:
+    Parses the WIDTH value of the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: width, remaining tokens, line number
     """
     global error_counter
@@ -734,9 +734,9 @@ def mif_width_value(tokens, line_number):
 
 def mif_depth_value(tokens, line_number):
     """
-    Parses the DEPTH value of the MIF file
-    :param tokens:
-    :param line_number:
+    Parses the DEPTH value of the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: depth, remaining tokens, line number
     """
     global error_counter
@@ -759,9 +759,9 @@ def mif_depth_value(tokens, line_number):
 
 def mif_radix_value(tokens, line_number):
     """
-    Parses the ADDRESS_RADIX or DATA_RADIX value of the MIF file
-    :param tokens:
-    :param line_number:
+    Parses the ADDRESS_RADIX or DATA_RADIX value of the MIF file.
+    :param tokens: List of tokens,
+    :param line_number: the current line number,
     :return: radix, remaining tokens, line number
     """
     global error_counter
@@ -803,9 +803,9 @@ def mif_radix_value(tokens, line_number):
 
 def mif_header_consistency_check(header_map, line_number):
     """
-    Checks the consistency of the header of the MIF file
-    :param header_map:
-    :param line_number:
+    Checks the consistency of the MIF file header.
+    :param header_map: The header map,
+    :param line_number: the line number,
     :return: header map
     """
     global error_counter

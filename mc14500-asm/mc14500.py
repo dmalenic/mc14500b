@@ -17,7 +17,7 @@ from mc14500util import BYTE_FMT, NIBBLE_FMT, NIBBLE3_FMT, WORD_FMT, MC14500_VER
 # ----------------------------------------------------------------------------------------------------
 # Hardware dependent configuration, adjust to match your hardware
 # Allowed values for ROM_WIDTH are 8, 12 or 16
-# Allowed values for MAX_ROM_DEPTH are positive integer multiples of 128 up to and including 65536
+# Allowed values for MAX_ROM_DEPTH are positive integer multiples of 128 up to and including 65,536
 # Allowed values for ROM_CMD_ORDER are cmd_order['ins_first'] or cmd_order['ins_last']
 # ----------------------------------------------------------------------------------------------------
 rom_width = 8
@@ -61,10 +61,10 @@ include_directory = ''
 
 def map_lut_index_to_label_location(asm_file_name, key, value):
     """
-    Maps the LUT index to a label location
-    :param asm_file_name:
-    :param key:
-    :param value:
+    Maps the LUT index to a label location.
+    :param asm_file_name: The assembler file name,
+    :param key: LUT index,
+    :param value: LUT value,
     :return: lut_index and label location
     """
     lut_dump_idx = int(value, 16)
@@ -79,8 +79,8 @@ def map_lut_index_to_label_location(asm_file_name, key, value):
 
 def dump_lut_to_integer_array(asm_file_name):
     """
-    Creates a LUT dump as a list of program counter values of a size of LUT table (IO address space)
-    :param asm_file_name:
+    Creates a LUT dump as a program-counter values list of the LUT table size (IO address space).
+    :param asm_file_name: The assembler file name,
     :return: LUT dump
     """
     global lut
@@ -103,8 +103,8 @@ def dump_lut_to_integer_array(asm_file_name):
 
 def dump_lut_to_byte_array(asm_file_name):
     """
-    Creates a LUT dump as an array of bytes of a size of LUT table times memory width divided by 8
-    :param asm_file_name:
+    Creates a LUT dump as an array of LUT table size bytes times memory width divided by 8.
+    :param asm_file_name: The assembler file name,
     :return: LUT dump
     """
     global lut
@@ -151,8 +151,8 @@ def merge_cmd_io_addr(inst, io_addr):
     """
     Combines 14500 4-bit instruction code and IO addresse together
     depending on the hardware design of the ICU peripherals.
-    :param inst:
-    :param io_addr:
+    :param inst: 4-bit instruction code,
+    :param io_addr: IO address,
     :return: assembled rom location content
     """
     global rom_width
@@ -173,11 +173,11 @@ def merge_cmd_io_addr(inst, io_addr):
 
 def add_command(data, asm_file_name, line_counter, lst_file):
     """
-    Puts a commands into a list (rom variable) to make it is easy to export in various formats
-    :param data:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
+    Puts a commands into a rom variable (a list) to make it is easier to export in various formats.
+    :param data: The assembled command,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
+    :param lst_file: the listing file name,
     :return: None
     """
     global error_counter
@@ -198,17 +198,17 @@ def add_command(data, asm_file_name, line_counter, lst_file):
 
 def map_io(inst, io_addr):
     """
-    A helper function that associates program instructions with IO operations, writes and reads.
-    The result is put in the map file that can be useful for analyzing old or others code and hardware
-    :param inst
-    :param io_addr
+    A helper function that associates program instructions with IO operations writes and reads.
+    The result is put in the map file that can be useful for analyzing old or other people code and hardware
+    :param inst: 4-bit instruction code,
+    :param io_addr: IO address,
     :return None
     """
     global map_none
     global map_read
     global map_write
 
-    # check how io address is used, it can either be read, or written or accessed without effect
+    # check how io address is used, it can either be read or written or accessed without effect
     # noinspection SpellCheckingInspection
     if inst in [instruction['NOPO'], instruction['JMP'], instruction['RTN'], instruction['SKZ']]:
         map_none[io_addr] = map_none.get(io_addr, 0) + 1
@@ -225,7 +225,7 @@ def get_addr_and_data_fmt_strings(data_fmt_char='X'):
     """
     Generate the format strings for the address and data fields in the mif file
     :param data_fmt_char:
-    :return:
+    :return: address and data format strings
     """
     global rom_width
     global max_rom_depth
@@ -244,26 +244,26 @@ def get_addr_and_data_fmt_strings(data_fmt_char='X'):
     return addr_fmt, data_fmt + data_fmt_char
 
 
-def print_cmd(data, asm, lst_file):
+def print_cmd(rom_entry_value, asm_line, lst_file):
     """
-    Function to print a command in listing format
-    :param data:
-    :param asm:
-    :param lst_file:
+    Function to print a command in listing format.
+    :param rom_entry_value: The value of the current rom entry (after assembling)
+    :param asm_line: A line of an asm file,
+    :param lst_file: the listing file name,
     :return: None
     """
     global program_counter
 
     addr_fmt, data_fmt = get_addr_and_data_fmt_strings()
-    instr_string = (addr_fmt + "   " + data_fmt) % (program_counter, data)
-    instr_string = instr_string.upper() + " " + asm
+    instr_string = (addr_fmt + "   " + data_fmt) % (program_counter, rom_entry_value)
+    instr_string = instr_string.upper() + " " + asm_line
     lst_file.write(instr_string + os.linesep)
 
 
 def is_comment(input_line_or_word):
     """
-    Checks if a line is a comment line
-    :param input_line_or_word:
+    Checks if a line is a comment line.
+    :param input_line_or_word: A line of an asm file or a word in an asm line,
     :return: True if it is a comment line, False otherwise
     """
     return (input_line_or_word.startswith(';') or
@@ -272,40 +272,40 @@ def is_comment(input_line_or_word):
             input_line_or_word.startswith('*'))
 
 
-def parse_numerical_constant(return_val):
+def parse_numerical_constant(number):
     # check if it is a number starting with DASM conventions and ending with C conventions
-    if return_val.startswith('#$'):
-        return_val = int(return_val[2:], 16)
-    elif return_val.startswith('#%'):
-        return_val = int(return_val[2:], 2)
-    elif return_val.startswith('#0'):
-        return_val = int(return_val[2:], 8)
-    elif return_val.startswith('#'):
-        return_val = int(return_val[1:], 10)
+    if number.startswith('#$'):
+        ret_val = int(number[2:], 16)
+    elif number.startswith('#%'):
+        ret_val = int(number[2:], 2)
+    elif number.startswith('#0'):
+        ret_val = int(number[2:], 8)
+    elif number.startswith('#'):
+        ret_val = int(number[1:], 10)
     else:
         # check if it is a number starting with Python conventions
         try:
-            return_val = int(return_val, 0)
+            ret_val = int(number, 0)
         except ValueError as e:
             # check if this is a number starting with C conventions (differes from Python for octal numbers)
-            if return_val.startswith('0'):
-                return_val = int(return_val, 8)
+            if number.startswith('0'):
+                ret_val = int(number, 8)
             else:
                 raise e
-    return return_val
+    return ret_val
 
 
 def process_io_address(io_address, asm_file_name, line_counter, lst_file):
     """
     Process identifier, usually this goes simple by just looking into the dictionary equals
     and picking the number. However, it can happen that another identifier is found instead
-    of a number, therefore the numerical representation of this identifier has to be found.
+    of a number; therefore, the numerical representation of this identifier has to be found.
     This could happen many times so a recursive identifier resolution is needed.
-    :param io_address:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
-    :return: the value associated to the identifier
+    :param io_address: Input-output address,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number in the assembler file,
+    :param lst_file: the listing file name,
+    :return: the value associated with the identifier
     """
     global equals
     global error_counter
@@ -313,7 +313,7 @@ def process_io_address(io_address, asm_file_name, line_counter, lst_file):
     return_val = io_address
 
     # Sometimes is convinient to use as an identifier a valid hex numbers (see 4-bit-latch.asm as an example,
-    # where D0 is an identifier). So frist try to resolve an instruction argument as an identifier, and if it fails
+    # where D0 is an identifier). So, first try to resolve an instruction argument as an identifier, and if it fails,
     # try to resolve ia as a hex constant.
     while return_val in equals:
         return_val = equals[return_val]
@@ -339,15 +339,15 @@ def process_io_address(io_address, asm_file_name, line_counter, lst_file):
     return return_val
 
 
-def process_instruction(inst, io_address, asm, asm_file_name, line_counter, lst_file):
+def process_instruction(inst, io_address, asm_line, asm_file_name, line_counter, lst_file):
     """
-    Processes the current instruction, writes the assembled line to the rom variable
-    :param inst:
-    :param io_address:
-    :param asm:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
+    Processes the current instruction, writes the assembled line to the rom variable.
+    :param inst: 4-bit instruction code
+    :param io_address: IO address
+    :param asm_line: a line of an asm file,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
+    :param lst_file: the listing file name,
     :return: None
     """
     global equals
@@ -356,7 +356,7 @@ def process_instruction(inst, io_address, asm, asm_file_name, line_counter, lst_
     # get the numerical representation of the identifier
     int_io_address = process_io_address(io_address, asm_file_name, line_counter, lst_file)
     data = merge_cmd_io_addr(inst, int_io_address)
-    print_cmd(data, asm, lst_file)
+    print_cmd(data, asm_line, lst_file)
     add_command(data, asm_file_name, line_counter, lst_file)
     map_io(inst, int_io_address)
 
@@ -371,29 +371,29 @@ def process_include_line(include_file_name, lst_file):
     lst_file.write(in_string + os.linesep)
 
 
-def process_equals_directive(asm, asm_words, asm_file_name, line_counter, lst_file):
+def process_equals_directive(asm_line, asm_words, asm_file_name, line_counter, lst_file):
     """
     Processes EQU directive: <name< EQU <value>
-    :param asm:
-    :param asm_words:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
-    :return:
+    :param asm_line: A line of an asm file,
+    :param asm_words: a list of words in the asm line,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
+    :param lst_file: the listing file name,
+    :return: None
     """
     global program_counter
     global error_counter
     global equals
     global include_directory
 
-    lst_file.write(asm + os.linesep)
+    lst_file.write(asm_line + os.linesep)
     left = asm_words[0]
     right = asm_words[2]
 
     if asm_words[1] == 'EQU':
         equals[left] = right
     else:
-        in_string = f"Error: Unknown content in file '{asm_file_name} line {line_counter}: {asm}"
+        in_string = f"Error: Unknown content in file '{asm_file_name} line {line_counter}: {asm_line}"
         print(in_string)
         lst_file.write(in_string + os.linesep)
         error_counter += 1
@@ -402,7 +402,7 @@ def process_equals_directive(asm, asm_words, asm_file_name, line_counter, lst_fi
 def is_label(word):
     """
     Checks if a word is a label
-    :param word:
+    :param word: A word in an asm line that is being processed,
     :return: True if it is a label, False otherwise
     """
     return word.endswith(':')
@@ -410,10 +410,10 @@ def is_label(word):
 
 def process_label(asm_line, asm_words, lst_file):
     """
-    Processes a label
-    :param asm_line:
-    :param asm_words:
-    :param lst_file:
+    Processes a label.
+    :param asm_line: A line of an asm file,
+    :param asm_words: a list of words in the asm line,
+    :param lst_file: the listing file name,
     :return: None
     """
     global program_counter
@@ -430,22 +430,22 @@ def process_label(asm_line, asm_words, lst_file):
     lst_file.write(asm_line + os.linesep)
 
 
-def process_lut_drective(asm, asm_words, asm_file_name, line_counter, lst_file):
+def process_lut_drective(asm_line, asm_words, asm_file_name, line_counter, lst_file):
     """
-    Processes LUT directive: LUT <name> <value>
-    :param asm:
-    :param asm_words:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
-    :return:
+    Processes LUT directive: `LUT <name> <value>`.
+    :param asm_line: A line of an asm file,
+    :param asm_words: a list of words in the asm line,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
+    :param lst_file: the listing file name,
+    :return: None
     """
     global program_counter
     global error_counter
     global lut
     global include_directory
 
-    lst_file.write(asm + os.linesep)
+    lst_file.write(asm_line + os.linesep)
     left = asm_words[1]
     right = asm_words[2]
 
@@ -458,7 +458,7 @@ def process_lut_drective(asm, asm_words, asm_file_name, line_counter, lst_file):
         else:
             lut[left] = right
     else:
-        in_string = f"Error: Unknown content in file '{asm_file_name} line {line_counter}: {asm}"
+        in_string = f"Error: Unknown content in file '{asm_file_name} line {line_counter}: {asm_line}"
         print(in_string)
         lst_file.write(in_string + os.linesep)
         error_counter += 1
@@ -466,12 +466,12 @@ def process_lut_drective(asm, asm_words, asm_file_name, line_counter, lst_file):
 
 def process_include_file(asm_line, asm_words, lst_file, asm_file_name, line_counter):
     """
-    Unknown word in the first word on an asm_line, try to open a file with this name in a lowercase (include files)
-    :param asm_line:
-    :param asm_words:
-    :param lst_file:
-    :param asm_file_name:
-    :param line_counter:
+    Unknown word in the first word on an asm_line, try to open a file with this name in the lowercase (include files).
+    :param asm_line: A line of an asm file,
+    :param asm_words: a list of words in the asm line,
+    :param lst_file: the listing file name,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
     :return: None
     """
     global error_counter
@@ -495,12 +495,12 @@ def process_include_file(asm_line, asm_words, lst_file, asm_file_name, line_coun
 
 def process_asm_file_line(asm_line, asm_words, asm_file_name, line_counter, lst_file):
     """
-    Assembles one line of asm file. The output is written to the appropriate ROM location.
-    :param asm_line:
-    :param asm_words:
-    :param asm_file_name:
-    :param line_counter:
-    :param lst_file:
+    Assembles one line of an asm file. The output is written to the appropriate ROM location.
+    :param asm_line: A line of an asm file,
+    :param asm_words: a list of words in the asm line,
+    :param asm_file_name: the assembler file name,
+    :param line_counter: the line number of the currently processed assembler line,
+    :param lst_file: the listing file name,
     :return: None
     """
     global program_counter
@@ -534,16 +534,16 @@ def process_asm_file_line(asm_line, asm_words, asm_file_name, line_counter, lst_
     elif asm_line.count("LUT") > 0:
         process_lut_drective(asm_line, asm_words, asm_file_name, line_counter, lst_file)
     else:
-        # unknown command found in line, test if it is an include file
+        # unknown command found in line; test if it is an include file
         process_include_file(asm_line, asm_words, lst_file, asm_file_name, line_counter)
 
 
 def preprocess_asm_line(asm_line):
     """
-    Split asm line and convert it to a canonical list asm words, i.e. make them upper case,
+    Split asm line and convert it to a canonical list asm words, i.e., make them upper case,
     remove comments and apply equals directives if encountered.
-    :param asm_line: a line of asm file
-    :return: canonical list of asm words in the provided asm line
+    :param asm_line: A line of an asm file,
+    :return: canonical list of asm words in the provided asm line.
     """
     asm_upper = asm_line.upper()
     asm_words = asm_upper.split()
@@ -561,9 +561,9 @@ def preprocess_asm_line(asm_line):
 def process_file(asm_file_name, lst_file):
     """
     Reads an asm file and assembles a program. It can be called recursively to allow projects with multiple asm
-    files if a line contains no known word it will be tried to open a file with this name (include files)
-    :param asm_file_name:
-    :param lst_file:
+    files. If a line contains no known word, it will try to open a file with this name (include files).
+    :param asm_file_name: The assembler file name,
+    :param lst_file: the listing file name,
     :return: None
     """
     # open asm file
@@ -604,9 +604,9 @@ def print_out_file_header(asm_file_name, handle_lst_file):
 
 def write_map_file_section(file, data_map):
     """
-    Writes a section of a map file
-    :param file:
-    :param data_map:
+    Writes a section of a map file.
+    :param file: The file handle,
+    :param data_map: the data map to be written,
     :return: None
     """
     file.write("IO Address       Access" + os.linesep)
@@ -632,10 +632,10 @@ def write_map_file_section(file, data_map):
 
 def print_mif_file_header(handle_mif_file, depth, width):
     """
-    Prints the header of the mif file
-    :param handle_mif_file:
-    :param depth:
-    :param width:
+    Prints the header of the mif file.
+    :param handle_mif_file: The MIF file-handle,
+    :param depth: the value of the depth parameter in the MIF file,
+    :param width: the value of the width parameter in the MIF file,
     :return: None
     """
     handle_mif_file.write("DEPTH = " + depth + ";" + os.linesep)
@@ -671,11 +671,11 @@ def get_lut_addr_and_data_fmt_strings():
 def export_to_mif_file(outfile, lut_outfile,  asm_file_name, err_ctr):
     """
     Exports the assembled data to a mif file
-    :param outfile:
-    :param lut_outfile:
-    :param asm_file_name:
-    :param err_ctr:
-    :return: error counter
+    :param outfile: The output file name,
+    :param lut_outfile: the file name for a file that holds the LUT table,
+    :param asm_file_name: the assembler file name,
+    :param err_ctr: the error counter,
+    :return: the new value of the error counter
     """
     with (open(outfile, 'w') as handle_mif_file):
         handle_mif_file.write("% -----------------------------------------------------------------------------" + os.linesep)
@@ -740,12 +740,12 @@ def export_to_mif_file(outfile, lut_outfile,  asm_file_name, err_ctr):
 
 def export_map_file(outfile, map_none_, map_read_, map_write_, asm_file_name):
     """
-    Exports a map file
-    :param outfile:
-    :param map_none_:
-    :param map_read_:
-    :param map_write_:
-    :param asm_file_name:
+    Exports a map file.
+    :param outfile: The output file name,
+    :param map_none_: the dictionary for commands that perform no io operation,
+    :param map_read_: the dictionary for commands that read from io,
+    :param map_write_: the dictionary for commands that write to io,
+    :param asm_file_name: the assembler file name,
     :return: None
     """
     with open(outfile, 'w') as handle_map_file:
@@ -845,7 +845,7 @@ def export_memory_dump_to_srec_file(outfile, memory_dump):
     :return: None
     """
     srec_addr_fmt, srec_len_fmt, srec_data_fmt = WORD_FMT, BYTE_FMT, BYTE_FMT
-    max_srec_data_len = 32  # historical recommendation, could be any value up to 252 for S1 records
+    max_srec_data_len = 32  # historical recommendation could be any value up to 252 for S1 records
 
     no_s1_lines = len(memory_dump) // max_srec_data_len
     if len(memory_dump) == 16:
@@ -859,7 +859,7 @@ def export_memory_dump_to_srec_file(outfile, memory_dump):
         program_name = "MC14500:"+os.path.basename(outfile).split('.')[0]
         if len(program_name) > 20:              # convention 20 chars module name
             program_name = program_name[0:20]
-        program_name += "00"                    # convention 2 chars for version and revsision number
+        program_name += "00"                    # convention 2 chars for a version and revsision number
         # add memroy width and depth information
         in_string = program_name + " W:" + str(rom_width) + " D:" + str(max_rom_depth)
         if len(in_string) > 32:
@@ -970,9 +970,9 @@ def export_to_raw_binary_file(asm_file_name):
 def output_file_name(asm_file_name, file_extension):
     """
     Creates the output file name, based on provide input assembler file name and the provided output file extension.
-    :param asm_file_name:
-    :param file_extension:
-    :return: output file name
+    :param asm_file_name: The input assembler file name,
+    :param file_extension: the output file extension,
+    :return: the output file name.
     """
     asm_file_name_words = asm_file_name.split('.')
     outfile = ".".join(asm_file_name_words[0:-1])
@@ -1056,7 +1056,7 @@ def main():
     print("on your hardware since it is external to the mc14500 chip.")
     print()
 
-    # check self configuration and consistency
+    # check self-configuration and consistency
     rom_cmd_order = cmd_order['ins_' + ins_pos_str]
     if not valid_depth(max_rom_depth):
         print("Error: MAX_ROM_DEPTH is not set correctly, allowed values are positive integer multiples of 128 up to "
@@ -1072,7 +1072,7 @@ def main():
     with open(lst_file, 'w') as handle_lst_file:
         handle_lst_file.write("MC14500 Assembler Generated List File" + os.linesep)
         print_out_file_header(asm_file_name, handle_lst_file)
-        process_file(asm_file_name, handle_lst_file)  # here  all the assembly is done
+        process_file(asm_file_name, handle_lst_file)  # here all the assembly is done
 
     if error_counter != 0:
         print("Assembler failed with ", error_counter, " error(s)")

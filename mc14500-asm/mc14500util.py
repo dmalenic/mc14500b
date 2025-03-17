@@ -19,8 +19,8 @@ cmd_order = {
 
 def srec_checksum(srec_record):
     """
-    Calculates a checksum of a srec record
-    :param srec_record:
+    Calculates a checksum of a srec record.
+    :param srec_record: SREC record as string,
     :return: checksum as 2 hex chars string
     """
     checksum = 0
@@ -32,8 +32,8 @@ def srec_checksum(srec_record):
 
 def valid_depth(depth):
     """
-    Check if the depth is valid
-    :param depth: depth to check
+    Check if the depth is valid.
+    :param depth: Depth to check
     :return: True if valid, False otherwise
     """
     return 128 <= depth <= 65536 and depth % 128 == 0
