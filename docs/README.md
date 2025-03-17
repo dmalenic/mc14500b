@@ -50,12 +50,12 @@ The following related resources were available on 2025-02-00:
 
 ## My Programs for Erturk Kocalar's RetroShield 14500
 
-I have [ported](https://github.com/dmalenic/mc14500b/8-bit-force/) a few demo programs to Erturk's RetroShield.
+I have [ported](https://github.com/dmalenic/mc14500b/tree/main/8-bit-force/) a few demo programs to Erturk's RetroShield.
 
-- [1D Conway's Game of Life](https://github.com/dmalenic/mc14500b/8-bit-force/k14500b_1d_conway_gol) is the port of [One Dimension Conway's Game of Life](https://github.com/dmalenic/mc14500b/#one-dimension-conways-game-of-life).
+- [1D Conway's Game of Life](https://github.com/dmalenic/mc14500b/tree/main/8-bit-force/k14500b_1d_conway_gol) is the port of [One Dimension Conway's Game of Life](https://github.com/dmalenic/mc14500b/#one-dimension-conways-game-of-life).
 
-- [Roll a Die](https://github.com/dmalenic/mc14500b/8-bit-force/k14500b_roll_a_die) is another port of a [demo program](https://github.com/dmalenic/mc14500b/#other-demo-programs).
+- [Roll a Die](https://github.com/dmalenic/mc14500b/tree/main/8-bit-force/k14500b_roll_a_die) is another port of a [demo program](https://github.com/dmalenic/mc14500b/#other-demo-programs).
 
-- [Stick 'n Rudder](https://github.com/dmalenic/mc14500b/8-bit-force/k14500b_stick_n_rudder) is example how to control the actual hardware using MC14500B.
+- [Stick 'n Rudder](https://github.com/dmalenic/mc14500b/tree/main/8-bit-force/k14500b_stick_n_rudder) is example how to control the actual hardware using MC14500B.
 
 See [Erturk's GitLab page](https://gitlab.com/8bitforce/retroshield-arduino/-/tree/master/k14500b) for more programs.
