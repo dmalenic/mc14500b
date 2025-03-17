@@ -6,7 +6,7 @@ How to fly-by-wire when all you have is 1 bit?
 
 ## Concept
 
-The stick program reads the connected rotary encoder, and when a clockwise or a counter-clockwise rotation is detected, a bit-banged SPI message is sent to the rudder program. The rudder program interprets the message and translates it to signals for the connected stepper motor to move three steps in the direction indicated by the received SPI message.
+The stick program reads the rotary encoder, and when a clockwise or a counter-clockwise rotation is detected, a bit-banged SPI message is sent to the rudder program. The rudder program interprets the message and translates it to signals for the connected stepper motor to move three steps in the direction indicated by the received SPI message.
 
 ## Hardware Setup
 
