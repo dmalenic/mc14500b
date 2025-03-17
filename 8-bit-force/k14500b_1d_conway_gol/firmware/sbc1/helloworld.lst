@@ -1,0 +1,239 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ./helloworld.s
+Current file: ./helloworld.s
+
+000000r 1               ;
+000000r 1               ; Hellorld
+000000r 1               ; Yaroslav Veremenko, December 25, 2022
+000000r 1               ;
+000000r 1               ; "HelloWorld!" over the UART!
+000000r 1               ; UART speed depends on the oscillator frequency
+000000r 1               ;
+000000r 1               
+000000r 1               ; 2024/12/10 - Erturk/ make it HelloWorld
+000000r 1               .include "system.inc"
+000000r 2               ;
+000000r 2               ; MC14500 assembler using ca65 macros
+000000r 2               ; Yaroslav Veremenko (c) 2022
+000000r 2               ;
+000000r 2               
+000000r 2               .feature ubiquitous_idents
+000000r 2               .feature string_escapes
+000000r 2               .setcpu "none"
+000000r 2               
+000000r 2               ; 0000 0: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               ; 0001 1: LD   = Data -> RR
+000000r 2               ; 0010 2: LDC  = !Data -> RR
+000000r 2               ; 0011 3: AND  = RR * Data -> RR
+000000r 2               ; 0100 4: ANDC = RR * !Data -> RR
+000000r 2               ; 0101 5: OR   = RR + Data -> RR
+000000r 2               ; 0110 6: ORC  = RR + !Data -> RR
+000000r 2               ; 0111 7: XNOR = RR == Data -> RR
+000000r 2               ; 1000 8: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2               ; 1001 9: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2               ; 1010 A: IEN  = Input enable. D -> IEN.
+000000r 2               ; 1011 B: OEN  = Output enable. D -> OEN.
+000000r 2               ; 1100 C: JMP  = Jump. Jump high.
+000000r 2               ; 1101 D: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2               ; 1110 E: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2               ; 1111 F: NOPF = No change in registers. RR -> RR. FLGF high.
+000000r 2               
+000000r 2               .define I_NOP0 0
+000000r 2               .define I_LD 1
+000000r 2               .define I_LDC 2
+000000r 2               .define I_AND 3
+000000r 2               .define I_ANDC 4
+000000r 2               .define I_OR 5
+000000r 2               .define I_ORC 6
+000000r 2               .define I_XNOR 7
+000000r 2               .define I_STO 8
+000000r 2               .define I_STOC 9
+000000r 2               .define I_IEN 10
+000000r 2               .define I_OEN 11
+000000r 2               .define I_JMP 12
+000000r 2               .define I_RTN 13
+000000r 2               .define I_SKZ 14
+000000r 2               .define I_NOPF 15
+000000r 2               
+000000r 2               RR = $8
+000000r 2               IN1 = $9
+000000r 2               IN2 = $A
+000000r 2               IN3 = $B
+000000r 2               IN4 = $C
+000000r 2               IN5 = $D
+000000r 2               IN6 = $E
+000000r 2               IN7 = $F
+000000r 2               
+000000r 2               MEM0 = $0
+000000r 2               MEM1 = $1
+000000r 2               MEM2 = $2
+000000r 2               MEM3 = $3
+000000r 2               MEM4 = $4
+000000r 2               MEM5 = $5
+000000r 2               MEM6 = $6
+000000r 2               MEM7 = $7
+000000r 2               
+000000r 2               OUT0 = $8
+000000r 2               OUT1 = $9
+000000r 2               OUT2 = $A
+000000r 2               OUT3 = $B
+000000r 2               OUT4 = $C
+000000r 2               OUT5 = $D
+000000r 2               OUT6 = $E
+000000r 2               OUT7 = $F
+000000r 2               
+000000r 2               .macro __lit_instr op, addr
+000000r 2                   .if (addr > $0F)
+000000r 2                       .error "Address overflow"
+000000r 2                   .endif
+000000r 2                   .byte <(((op) << 4) | ((<(addr)) & $0F))
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro __instr op, addr
+000000r 2                   __lit_instr op, addr
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro nop0 addr    ; 0000: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               .ifblank    addr
+000000r 2                   __instr I_NOP0, 0
+000000r 2               .else
+000000r 2                   __instr I_NOP0, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro ld addr      ; 0001: LD
+000000r 2                   __instr I_LD, addr
+000000r 2               .endmacro
+000000r 2               .macro ldc addr     ; 0010: LDC
+000000r 2                   __instr I_LDC, addr
+000000r 2               .endmacro
+000000r 2               .macro and addr     ; 0011: AND
+000000r 2                   __instr I_AND, addr
+000000r 2               .endmacro
+000000r 2               .macro andc addr    ; 0100: ANDC
+000000r 2                   __instr I_ANDC, addr
+000000r 2               .endmacro
+000000r 2               .macro or addr      ; 0101: OR
+000000r 2                   __instr I_OR, addr
+000000r 2               .endmacro
+000000r 2               .macro orc addr     ; 0110: ORC
+000000r 2                   __instr I_ORC, addr
+000000r 2               .endmacro
+000000r 2               .macro xnor addr    ; 0111: XNOR
+000000r 2                   __instr I_XNOR, addr
+000000r 2               .endmacro
+000000r 2               .macro sto addr     ; 1000: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2                   __instr I_STO, addr
+000000r 2               .endmacro
+000000r 2               .macro stoc addr    ; 1001: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2                   __instr I_STOC, addr
+000000r 2               .endmacro
+000000r 2               .macro ien addr     ; 1010: IEN  = Input enable. D -> IEN.
+000000r 2                   __instr I_IEN, addr
+000000r 2               .endmacro
+000000r 2               .macro oen addr     ; 1011: OEN  = Output enable. D -> OEN.
+000000r 2                   __instr I_OEN, addr
+000000r 2               .endmacro
+000000r 2               .macro jmp addr     ; 1100: JMP  = Jump. Jump high.
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_JMP, 0
+000000r 2               .else
+000000r 2                   __instr I_JMP, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro rtn          ; 1101: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2                   __instr I_RTN, 0
+000000r 2               .endmacro
+000000r 2               .macro skz          ; 1110: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2                   __instr I_SKZ, 0
+000000r 2               .endmacro
+000000r 2               .macro nopf addr    ; 1111: NOPF = No change
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_NOPF, 0
+000000r 2               .else
+000000r 2                   __instr I_NOPF, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               
+000000r 1               
+000000r 1               TX = OUT0
+000000r 1               
+000000r 1               .macro tx_bit_send chr, mask
+000000r 1                   .if chr & mask > 0
+000000r 1                       sto     TX ; 1
+000000r 1                   .else
+000000r 1                       stoc    TX ; 0
+000000r 1                   .endif
+000000r 1               .endmacro
+000000r 1               
+000000r 1               .macro tx_send chr
+000000r 1                   stoc    TX     ; 0 - frame start
+000000r 1                   tx_bit_send chr, $01
+000000r 1                   tx_bit_send chr, $02
+000000r 1                   tx_bit_send chr, $04
+000000r 1                   tx_bit_send chr, $08
+000000r 1                   tx_bit_send chr, $10
+000000r 1                   tx_bit_send chr, $20
+000000r 1                   tx_bit_send chr, $40
+000000r 1                   tx_bit_send chr, $80
+000000r 1                   sto     TX     ; 1 - frame end
+000000r 1                   nop0           ; wait one more bit
+000000r 1               .endmacro
+000000r 1               
+000000r 1               .macro tx_print str
+000000r 1                   .repeat 32,I
+000000r 1                   .if I < .strlen(str)
+000000r 1                   c       .set .strat(str, I)
+000000r 1                   tx_send c
+000000r 1                   .endif
+000000r 1                   .endrepeat
+000000r 1               .endmacro
+000000r 1               
+000000r 1               .segment "CODE"
+000000r 1                   ; *** init code to enable IEN ***
+000000r 1  68               orc     RR     ; 1 -> RR
+000001r 1  A8               ien     RR     ; enable input
+000002r 1  B8               oen     RR     ; enable init branch
+000003r 1               
+000003r 1                   ; *** program ***
+000003r 1  68               orc     RR     ; 1 -> RR
+000004r 1  88               sto     TX     ; init TX, set stop bit high
+000005r 1               
+000005r 1  98 98 98 98      tx_print "HelloWorld!\r\n"
+000009r 1  88 98 98 88  
+00000Dr 1  98 88 00 98  
+000011r 1  88 98 88 98  
+000015r 1  98 88 88 98  
+000019r 1  88 00 98 98  
+00001Dr 1  98 88 88 98  
+000021r 1  88 88 98 88  
+000025r 1  00 98 98 98  
+000029r 1  88 88 98 88  
+00002Dr 1  88 98 88 00  
+000031r 1  98 88 88 88  
+000035r 1  88 98 88 88  
+000039r 1  98 88 00 98  
+00003Dr 1  88 88 88 98  
+000041r 1  88 98 88 98  
+000045r 1  88 00 98 88  
+000049r 1  88 88 88 98  
+00004Dr 1  88 88 98 88  
+000051r 1  00 98 98 88  
+000055r 1  98 98 88 88  
+000059r 1  88 98 88 00  
+00005Dr 1  98 98 98 88  
+000061r 1  88 98 88 88  
+000065r 1  98 88 00 98  
+000069r 1  98 98 88 98  
+00006Dr 1  98 88 88 98  
+000071r 1  88 00 98 88  
+000075r 1  98 98 98 98  
+000079r 1  88 98 98 88  
+00007Dr 1  00 98 88 98  
+000081r 1  88 88 98 98  
+000085r 1  98 98 88 00  
+000089r 1  98 98 88 98  
+00008Dr 1  88 98 98 98  
+000091r 1  98 88 00     
+000094r 1               
+000094r 1  F0               nopf           ; halt
+000094r 1               

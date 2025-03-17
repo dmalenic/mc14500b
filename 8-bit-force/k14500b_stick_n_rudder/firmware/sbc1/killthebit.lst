@@ -1,0 +1,260 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ./killthebit.s
+Current file: ./killthebit.s
+
+000000r 1               ;
+000000r 1               ; Kill the Bit game
+000000r 1               ; Based on idea by Dean McDaniel, May 15, 1975
+000000r 1               ; Yaroslav Veremenko, December 11, 2022
+000000r 1               ;
+000000r 1               ; Original Description
+000000r 1               ;   Object: Kill the rotating bit. If you miss the lit bit, another
+000000r 1               ;   bit turns on leaving two bits to destroy. Quickly
+000000r 1               ;   toggle the switch, don't leave the switch in the up
+000000r 1               ;   position. Before starting, make sure all the switches
+000000r 1               ;   are in the down position.
+000000r 1               ;
+000000r 1               ; Reference
+000000r 1               ;   https://altairclone.com/downloads/killbits.pdf
+000000r 1               ;
+000000r 1               ; MC14500 Notes
+000000r 1               ;   7 input switches correspond to bits 1-7 of the output, bit 0 is unused
+000000r 1               ;   Bit 0 of memory is used as temporary storage
+000000r 1               ;   Bits 1-7 store state of the display
+000000r 1               
+000000r 1               .include "system.inc"
+000000r 2               ;
+000000r 2               ; MC14500 assembler using ca65 macros
+000000r 2               ; Yaroslav Veremenko (c) 2022
+000000r 2               ;
+000000r 2               
+000000r 2               .feature ubiquitous_idents
+000000r 2               .feature string_escapes
+000000r 2               .setcpu "none"
+000000r 2               
+000000r 2               ; 0000 0: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               ; 0001 1: LD   = Data -> RR
+000000r 2               ; 0010 2: LDC  = !Data -> RR
+000000r 2               ; 0011 3: AND  = RR * Data -> RR
+000000r 2               ; 0100 4: ANDC = RR * !Data -> RR
+000000r 2               ; 0101 5: OR   = RR + Data -> RR
+000000r 2               ; 0110 6: ORC  = RR + !Data -> RR
+000000r 2               ; 0111 7: XNOR = RR == Data -> RR
+000000r 2               ; 1000 8: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2               ; 1001 9: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2               ; 1010 A: IEN  = Input enable. D -> IEN.
+000000r 2               ; 1011 B: OEN  = Output enable. D -> OEN.
+000000r 2               ; 1100 C: JMP  = Jump. Jump high.
+000000r 2               ; 1101 D: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2               ; 1110 E: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2               ; 1111 F: NOPF = No change in registers. RR -> RR. FLGF high.
+000000r 2               
+000000r 2               .define I_NOP0 0
+000000r 2               .define I_LD 1
+000000r 2               .define I_LDC 2
+000000r 2               .define I_AND 3
+000000r 2               .define I_ANDC 4
+000000r 2               .define I_OR 5
+000000r 2               .define I_ORC 6
+000000r 2               .define I_XNOR 7
+000000r 2               .define I_STO 8
+000000r 2               .define I_STOC 9
+000000r 2               .define I_IEN 10
+000000r 2               .define I_OEN 11
+000000r 2               .define I_JMP 12
+000000r 2               .define I_RTN 13
+000000r 2               .define I_SKZ 14
+000000r 2               .define I_NOPF 15
+000000r 2               
+000000r 2               RR = $8
+000000r 2               IN1 = $9
+000000r 2               IN2 = $A
+000000r 2               IN3 = $B
+000000r 2               IN4 = $C
+000000r 2               IN5 = $D
+000000r 2               IN6 = $E
+000000r 2               IN7 = $F
+000000r 2               
+000000r 2               MEM0 = $0
+000000r 2               MEM1 = $1
+000000r 2               MEM2 = $2
+000000r 2               MEM3 = $3
+000000r 2               MEM4 = $4
+000000r 2               MEM5 = $5
+000000r 2               MEM6 = $6
+000000r 2               MEM7 = $7
+000000r 2               
+000000r 2               OUT0 = $8
+000000r 2               OUT1 = $9
+000000r 2               OUT2 = $A
+000000r 2               OUT3 = $B
+000000r 2               OUT4 = $C
+000000r 2               OUT5 = $D
+000000r 2               OUT6 = $E
+000000r 2               OUT7 = $F
+000000r 2               
+000000r 2               .macro __lit_instr op, addr
+000000r 2                   .if (addr > $0F)
+000000r 2                       .error "Address overflow"
+000000r 2                   .endif
+000000r 2                   .byte <(((op) << 4) | ((<(addr)) & $0F))
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro __instr op, addr
+000000r 2                   __lit_instr op, addr
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro nop0 addr    ; 0000: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               .ifblank    addr
+000000r 2                   __instr I_NOP0, 0
+000000r 2               .else
+000000r 2                   __instr I_NOP0, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro ld addr      ; 0001: LD
+000000r 2                   __instr I_LD, addr
+000000r 2               .endmacro
+000000r 2               .macro ldc addr     ; 0010: LDC
+000000r 2                   __instr I_LDC, addr
+000000r 2               .endmacro
+000000r 2               .macro and addr     ; 0011: AND
+000000r 2                   __instr I_AND, addr
+000000r 2               .endmacro
+000000r 2               .macro andc addr    ; 0100: ANDC
+000000r 2                   __instr I_ANDC, addr
+000000r 2               .endmacro
+000000r 2               .macro or addr      ; 0101: OR
+000000r 2                   __instr I_OR, addr
+000000r 2               .endmacro
+000000r 2               .macro orc addr     ; 0110: ORC
+000000r 2                   __instr I_ORC, addr
+000000r 2               .endmacro
+000000r 2               .macro xnor addr    ; 0111: XNOR
+000000r 2                   __instr I_XNOR, addr
+000000r 2               .endmacro
+000000r 2               .macro sto addr     ; 1000: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2                   __instr I_STO, addr
+000000r 2               .endmacro
+000000r 2               .macro stoc addr    ; 1001: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2                   __instr I_STOC, addr
+000000r 2               .endmacro
+000000r 2               .macro ien addr     ; 1010: IEN  = Input enable. D -> IEN.
+000000r 2                   __instr I_IEN, addr
+000000r 2               .endmacro
+000000r 2               .macro oen addr     ; 1011: OEN  = Output enable. D -> OEN.
+000000r 2                   __instr I_OEN, addr
+000000r 2               .endmacro
+000000r 2               .macro jmp addr     ; 1100: JMP  = Jump. Jump high.
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_JMP, 0
+000000r 2               .else
+000000r 2                   __instr I_JMP, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro rtn          ; 1101: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2                   __instr I_RTN, 0
+000000r 2               .endmacro
+000000r 2               .macro skz          ; 1110: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2                   __instr I_SKZ, 0
+000000r 2               .endmacro
+000000r 2               .macro nopf addr    ; 1111: NOPF = No change
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_NOPF, 0
+000000r 2               .else
+000000r 2                   __instr I_NOPF, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               
+000000r 1               
+000000r 1               BIT_I0 = IN1
+000000r 1               BIT_I1 = IN2
+000000r 1               BIT_I2 = IN3
+000000r 1               BIT_I3 = IN4
+000000r 1               BIT_I4 = IN5
+000000r 1               BIT_I5 = IN6
+000000r 1               BIT_I6 = IN7
+000000r 1               
+000000r 1               BIT_O0 = OUT1
+000000r 1               BIT_O1 = OUT2
+000000r 1               BIT_O2 = OUT3
+000000r 1               BIT_O3 = OUT4
+000000r 1               BIT_O4 = OUT5
+000000r 1               BIT_O5 = OUT6
+000000r 1               BIT_O6 = OUT7
+000000r 1               
+000000r 1               TMP   = MEM0
+000000r 1               BIT_M0 = MEM1
+000000r 1               BIT_M1 = MEM2
+000000r 1               BIT_M2 = MEM3
+000000r 1               BIT_M3 = MEM4
+000000r 1               BIT_M4 = MEM5
+000000r 1               BIT_M5 = MEM6
+000000r 1               BIT_M6 = MEM7
+000000r 1               
+000000r 1               .macro exchange left, right
+000000r 1                   ld      (left)
+000000r 1                   sto     TMP
+000000r 1                   ld      (right)
+000000r 1                   sto     (left)
+000000r 1                   ld      TMP
+000000r 1                   sto     (right)
+000000r 1               .endmacro
+000000r 1               
+000000r 1               .segment "CODE"
+000000r 1                   ; *** init code to enable IEN ***
+000000r 1  80               sto     TMP    ; presever RR
+000001r 1  68               orc     RR     ; 1 -> RR
+000002r 1  A8               ien     RR     ; enable input
+000003r 1  10               ld      TMP    ; restore RR
+000004r 1               
+000004r 1                   ; *** run once on startup ***
+000004r 1  28               ldc     RR     ; RR is 0 at reset
+000005r 1  B8               oen     RR     ; enable init branch
+000006r 1  81               sto     BIT_M0 ; initialize memory with 1 initial bit
+000007r 1               
+000007r 1                   ; *** main loop ***
+000007r 1  68               orc     RR     ; 1 -> RR
+000008r 1  B8               oen     RR     ; force enable main loop
+000009r 1               
+000009r 1                   ; display all the bits
+000009r 1  11 89 12 8A  .repeat 7,I
+00000Dr 1  13 8B 14 8C  
+000011r 1  15 8D 16 8E  
+000015r 1  17 8F        
+000017r 1                   ld      BIT_M0+I
+000017r 1                   sto     BIT_O0+I
+000017r 1               .endrepeat
+000017r 1               
+000017r 1                   ; xor inputs with memory
+000017r 1  19 71 91 1A  .repeat 7,I
+00001Br 1  72 92 1B 73  
+00001Fr 1  93 1C 74 94  
+000023r 1  1D 75 95 1E  
+000027r 1  76 96 1F 77  
+00002Br 1  97           
+00002Cr 1                   ld      BIT_I0+I
+00002Cr 1                   xnor    BIT_M0+I
+00002Cr 1                   stoc    BIT_M0+I
+00002Cr 1               .endrepeat
+00002Cr 1               
+00002Cr 1                   ; rotate data
+00002Cr 1                   ; M[5-I] -> TMP
+00002Cr 1                   ; M[4-I] -> M[5-I]
+00002Cr 1                   ; TMP -> M[4-I]
+00002Cr 1  16 80 15 86  .repeat 6,I
+000030r 1  10 85 15 80  
+000034r 1  14 85 10 84  
+000038r 1  14 80 13 84  
+00003Cr 1  10 83 13 80  
+000040r 1  12 83 10 82  
+000044r 1  12 80 11 82  
+000048r 1  10 81 11 80  
+00004Cr 1  10 81 10 80  
+000050r 1                   exchange BIT_M5-I, BIT_M4-I
+000050r 1               .endrepeat
+000050r 1                   ; exchange last and first bits
+000050r 1  17 80 11 87      exchange BIT_M6, BIT_M0
+000054r 1  10 81        
+000056r 1               
+000056r 1  68               orc     RR     ; 1 -> RR, so init code won't run on the next loop
+000056r 1               

@@ -1,0 +1,385 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ./roll-a-die.s
+Current file: ./roll-a-die.s
+
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; Roll a Die:
+000000r 1               ;   When the STOP signal is zero, the die rolls and the
+000000r 1               ;   outputs OUT0 to OUT5 are sequentially turned on.
+000000r 1               ;   When the STOP becomes one, the die stops with outputs
+000000r 1               ;   OUT0 to OUT5 showing the number.
+000000r 1               ;   Input IN1 is the STOP signal.
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; Note:
+000000r 1               ;   The main loop is written so that the number of
+000000r 1               ;   instructions implementing each die state is identical,
+000000r 1               ;   the die is not loaded ;-).
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; This program demonstrates how to use JMP instruction
+000000r 1               ; and an external lookup-table (implemented in Arduino
+000000r 1               ; monitor program) to jump to arbitrary program locations
+000000r 1               ; i.e. not restricted to 4-bit address space.
+000000r 1               ; See `jmp_jsr_lut.h` for the additional information how
+000000r 1               ; to define and use lookup table.
+000000r 1               ; ------------------------------------------------------
+000000r 1               
+000000r 1               .feature org_per_seg
+000000r 1               
+000000r 1               .include "system.inc"
+000000r 2               ;
+000000r 2               ; MC14500 assembler using ca65 macros
+000000r 2               ; Yaroslav Veremenko (c) 2022
+000000r 2               ;
+000000r 2               
+000000r 2               .feature ubiquitous_idents
+000000r 2               .feature string_escapes
+000000r 2               .setcpu "none"
+000000r 2               
+000000r 2               ; 0000 0: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               ; 0001 1: LD   = Data -> RR
+000000r 2               ; 0010 2: LDC  = !Data -> RR
+000000r 2               ; 0011 3: AND  = RR * Data -> RR
+000000r 2               ; 0100 4: ANDC = RR * !Data -> RR
+000000r 2               ; 0101 5: OR   = RR + Data -> RR
+000000r 2               ; 0110 6: ORC  = RR + !Data -> RR
+000000r 2               ; 0111 7: XNOR = RR == Data -> RR
+000000r 2               ; 1000 8: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2               ; 1001 9: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2               ; 1010 A: IEN  = Input enable. D -> IEN.
+000000r 2               ; 1011 B: OEN  = Output enable. D -> OEN.
+000000r 2               ; 1100 C: JMP  = Jump. Jump high.
+000000r 2               ; 1101 D: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2               ; 1110 E: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2               ; 1111 F: NOPF = No change in registers. RR -> RR. FLGF high.
+000000r 2               
+000000r 2               .define I_NOP0 0
+000000r 2               .define I_LD 1
+000000r 2               .define I_LDC 2
+000000r 2               .define I_AND 3
+000000r 2               .define I_ANDC 4
+000000r 2               .define I_OR 5
+000000r 2               .define I_ORC 6
+000000r 2               .define I_XNOR 7
+000000r 2               .define I_STO 8
+000000r 2               .define I_STOC 9
+000000r 2               .define I_IEN 10
+000000r 2               .define I_OEN 11
+000000r 2               .define I_JMP 12
+000000r 2               .define I_RTN 13
+000000r 2               .define I_SKZ 14
+000000r 2               .define I_NOPF 15
+000000r 2               
+000000r 2               RR = $8
+000000r 2               IN1 = $9
+000000r 2               IN2 = $A
+000000r 2               IN3 = $B
+000000r 2               IN4 = $C
+000000r 2               IN5 = $D
+000000r 2               IN6 = $E
+000000r 2               IN7 = $F
+000000r 2               
+000000r 2               MEM0 = $0
+000000r 2               MEM1 = $1
+000000r 2               MEM2 = $2
+000000r 2               MEM3 = $3
+000000r 2               MEM4 = $4
+000000r 2               MEM5 = $5
+000000r 2               MEM6 = $6
+000000r 2               MEM7 = $7
+000000r 2               
+000000r 2               OUT0 = $8
+000000r 2               OUT1 = $9
+000000r 2               OUT2 = $A
+000000r 2               OUT3 = $B
+000000r 2               OUT4 = $C
+000000r 2               OUT5 = $D
+000000r 2               OUT6 = $E
+000000r 2               OUT7 = $F
+000000r 2               
+000000r 2               .macro __lit_instr op, addr
+000000r 2                   .if (addr > $0F)
+000000r 2                       .error "Address overflow"
+000000r 2                   .endif
+000000r 2                   .byte <(((op) << 4) | ((<(addr)) & $0F))
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro __instr op, addr
+000000r 2                   __lit_instr op, addr
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro nop0 addr    ; 0000: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               .ifblank    addr
+000000r 2                   __instr I_NOP0, 0
+000000r 2               .else
+000000r 2                   __instr I_NOP0, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro ld addr      ; 0001: LD
+000000r 2                   __instr I_LD, addr
+000000r 2               .endmacro
+000000r 2               .macro ldc addr     ; 0010: LDC
+000000r 2                   __instr I_LDC, addr
+000000r 2               .endmacro
+000000r 2               .macro and addr     ; 0011: AND
+000000r 2                   __instr I_AND, addr
+000000r 2               .endmacro
+000000r 2               .macro andc addr    ; 0100: ANDC
+000000r 2                   __instr I_ANDC, addr
+000000r 2               .endmacro
+000000r 2               .macro or addr      ; 0101: OR
+000000r 2                   __instr I_OR, addr
+000000r 2               .endmacro
+000000r 2               .macro orc addr     ; 0110: ORC
+000000r 2                   __instr I_ORC, addr
+000000r 2               .endmacro
+000000r 2               .macro xnor addr    ; 0111: XNOR
+000000r 2                   __instr I_XNOR, addr
+000000r 2               .endmacro
+000000r 2               .macro sto addr     ; 1000: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2                   __instr I_STO, addr
+000000r 2               .endmacro
+000000r 2               .macro stoc addr    ; 1001: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2                   __instr I_STOC, addr
+000000r 2               .endmacro
+000000r 2               .macro ien addr     ; 1010: IEN  = Input enable. D -> IEN.
+000000r 2                   __instr I_IEN, addr
+000000r 2               .endmacro
+000000r 2               .macro oen addr     ; 1011: OEN  = Output enable. D -> OEN.
+000000r 2                   __instr I_OEN, addr
+000000r 2               .endmacro
+000000r 2               .macro jmp addr     ; 1100: JMP  = Jump. Jump high.
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_JMP, 0
+000000r 2               .else
+000000r 2                   __instr I_JMP, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro rtn          ; 1101: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2                   __instr I_RTN, 0
+000000r 2               .endmacro
+000000r 2               .macro skz          ; 1110: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2                   __instr I_SKZ, 0
+000000r 2               .endmacro
+000000r 2               .macro nopf addr    ; 1111: NOPF = No change
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_NOPF, 0
+000000r 2               .else
+000000r 2                   __instr I_NOPF, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               
+000000r 1               
+000000r 1               STOP  = IN1
+000000r 1               
+000000r 1               ROLLED_1 = 1
+000000r 1               ROLLED_2 = 2
+000000r 1               ROLLED_3 = 3
+000000r 1               ROLLED_4 = 4
+000000r 1               ROLLED_5 = 5
+000000r 1               ROLLED_6 = 6
+000000r 1               
+000000r 1               ROLL_AGAIN = $F
+000000r 1               
+000000r 1               .segment "CODE"
+000000r 1               .org    0               ; required by the next .res directive later in a code
+000000  1               
+000000  1               ; ------------------------------------------------------
+000000  1               ; initialization
+000000  1               ; enable inputs and outputs
+000000  1               ; ------------------------------------------------------
+000000  1               
+000000  1  68               orc     RR          ; force 1 into RR regardless whether inputs and outputs were enabled
+000001  1  A8               ien     RR          ; enable inputs
+000002  1  B8               oen     RR          ; enable outputs
+000003  1               
+000003  1               ; ------------------------------------------------------
+000003  1               ; The die is rolling, side 1, is a special case
+000003  1               ; because of rolling 6 to 1
+000003  1               ; ------------------------------------------------------
+000003  1               
+000003  1  19               ld      STOP        ; load the state of STOP switch
+000004  1  E0               skz                 ; if it was not pressed skip next instruction to continue rolling a die
+000005  1  C1               jmp     ROLLED_1    ; STOP is pressed
+000006  1  98               stoc    OUT0        ; set output 0 to 1 to provide a rolling effect
+000007  1  8D               sto     OUT5        ; set output 5 to 0 (the previous die side) - rolling effect
+000008  1                   ; 4 nop0s are needed to compensate for the code that will be implicitly added to the
+000008  1                   ; last die side to consider (we don't want 6 to have a higher probability)
+000008  1  00               nop0
+000009  1  00               nop0
+00000A  1  00               nop0
+00000B  1  00               nop0
+00000C  1               
+00000C  1               ; ------------------------------------------------------
+00000C  1               ; The die is rolling, sides 2, 3, 4 and 5 can be
+00000C  1               ; defined using .repeat macro.
+00000C  1               ; ------------------------------------------------------
+00000C  1               
+00000C  1  19 E0 C2 99  .repeat 4,I
+000010  1  88 00 00 00  
+000014  1  00 19 E0 C3  
+000018  1  9A 89 00 00  
+00001C  1  00 00 19 E0  
+000020  1  C4 9B 8A 00  
+000024  1  00 00 00 19  
+000028  1  E0 C5 9C 8B  
+00002C  1  00 00 00 00  
+000030  1                   ld      STOP        ; load the state of STOP switch
+000030  1                   skz                 ; if it was not pressed skip next instruction to continue rolling a die
+000030  1                   jmp     ROLLED_2+I  ; STOP is pressed
+000030  1                   stoc    OUT1+I      ; set output 1+I to 1 to provide a rolling effect
+000030  1                   sto     OUT0+I      ; set output I to 0 (the previous die side) - rolling effect
+000030  1                   ; 4 nop0s are needed to compensate for the code that will be implicitly added to the
+000030  1                   ; last die side to consider (we don't want 6 to have a higher probability)
+000030  1                   nop0
+000030  1                   nop0
+000030  1                   nop0
+000030  1                   nop0
+000030  1               .endrepeat
+000030  1               
+000030  1               ; ------------------------------------------------------
+000030  1               ; The die is rolling, side 6 is another special case.
+000030  1               ; Instead of 4 nop0 instruction it executes jump to the
+000030  1               ; beginning of the program and uses program initialization
+000030  1               ; instructions to compensate for the time.
+000030  1               ; ------------------------------------------------------
+000030  1               
+000030  1  19               ld      STOP        ; load the state of STOP switch
+000031  1  E0               skz                 ; if it was not pressed skip next instruction to continue rolling a die
+000032  1  C6               jmp     ROLLED_6    ; STOP is pressed
+000033  1  9D               stoc    OUT5        ; set output OUT5 to 1 to provide a rolling effect
+000034  1  8C               sto     OUT4        ; set output OUT4 to 0 (the previous die side) - rolling effect
+000035  1                   ; jmp is instead of the first nop0, orc RR, ien RR and oen RR will compensate for other nop0s
+000035  1  C0               jmp
+000036  1               
+000036  1               
+000036  1               ; ------------------------------------------------------
+000036  1               ; Display the result if side 1 is rolled.
+000036  1               ; ------------------------------------------------------
+000036  1  xx xx xx xx  .res    $80-*           ; see https://www.cc65.org/faq.php  : The .ORG directive
+00003A  1  xx xx xx xx  
+00003E  1  xx xx xx xx  
+000042  1  xx xx xx xx  
+000046  1  xx xx xx xx  
+00004A  1  xx xx xx xx  
+00004E  1  xx xx xx xx  
+000052  1  xx xx xx xx  
+000056  1  xx xx xx xx  
+00005A  1  xx xx xx xx  
+00005E  1  xx xx xx xx  
+000062  1  xx xx xx xx  
+000066  1  xx xx xx xx  
+00006A  1  xx xx xx xx  
+00006E  1  xx xx xx xx  
+000072  1  xx xx xx xx  
+000076  1  xx xx xx xx  
+00007A  1  xx xx xx xx  
+00007E  1  xx xx        
+000080  1               .org    $80             ; required for the next .res
+000080  1               
+000080  1  88               sto     OUT0
+000081  1  99 9A 9B 9C  .repeat 7,I
+000085  1  9D 9E 9F     
+000088  1                   stoc    OUT1+I
+000088  1               .endrepeat
+000088  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+000089  1               
+000089  1               
+000089  1               ; ------------------------------------------------------
+000089  1               ; Display the result if side 2 is rolled.
+000089  1               ; ------------------------------------------------------
+000089  1  xx xx xx xx  .res    $90-*
+00008D  1  xx xx xx     
+000090  1               .org    $90
+000090  1               
+000090  1  88               sto     OUT0
+000091  1  89               sto     OUT1
+000092  1  9A 9B 9C 9D  .repeat 6,I
+000096  1  9E 9F        
+000098  1                   stoc    OUT2+I
+000098  1               .endrepeat
+000098  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+000099  1               
+000099  1               
+000099  1               ; ------------------------------------------------------
+000099  1               ; Display the result if side 3 is rolled.
+000099  1               ; ------------------------------------------------------
+000099  1  xx xx xx xx  .res    $A0-*
+00009D  1  xx xx xx     
+0000A0  1               .org    $A0
+0000A0  1               
+0000A0  1  88 89 8A     .repeat 3,I
+0000A3  1                   sto     OUT0+I
+0000A3  1               .endrepeat
+0000A3  1  9B 9C 9D 9E  .repeat 5,I
+0000A7  1  9F           
+0000A8  1                   stoc    OUT3+I
+0000A8  1               .endrepeat
+0000A8  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+0000A9  1               
+0000A9  1               
+0000A9  1               ; ------------------------------------------------------
+0000A9  1               ; Display the result if side 4 is rolled.
+0000A9  1               ; ------------------------------------------------------
+0000A9  1  xx xx xx xx  .res    $B0-*
+0000AD  1  xx xx xx     
+0000B0  1               .org    $B0
+0000B0  1               
+0000B0  1  88 89 8A 8B  .repeat 4,I
+0000B4  1                   sto     OUT0+I
+0000B4  1               .endrepeat
+0000B4  1  9C 9D 9E 9F  .repeat 4,I
+0000B8  1                   stoc    OUT4+I
+0000B8  1               .endrepeat
+0000B8  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+0000B9  1               
+0000B9  1               
+0000B9  1               ; ------------------------------------------------------
+0000B9  1               ; Display the result if side 5 is rolled.
+0000B9  1               ; ------------------------------------------------------
+0000B9  1  xx xx xx xx  .res    $C0-*
+0000BD  1  xx xx xx     
+0000C0  1               .org    $C0
+0000C0  1               
+0000C0  1  88 89 8A 8B  .repeat 5,I
+0000C4  1  8C           
+0000C5  1                   sto     OUT0+I
+0000C5  1               .endrepeat
+0000C5  1  9D 9E 9F     .repeat 3,I
+0000C8  1                   stoc    OUT5+I
+0000C8  1               .endrepeat
+0000C8  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+0000C9  1               
+0000C9  1               
+0000C9  1               ; ------------------------------------------------------
+0000C9  1               ; Display the result if side 6 is rolled.
+0000C9  1               ; ------------------------------------------------------
+0000C9  1  xx xx xx xx  .res    $D0-*
+0000CD  1  xx xx xx     
+0000D0  1               .org    $D0
+0000D0  1               
+0000D0  1  88 89 8A 8B  .repeat 6,I
+0000D4  1  8C 8D        
+0000D6  1                   sto     OUT0+I
+0000D6  1               .endrepeat
+0000D6  1  9E 9F        .repeat 2,I
+0000D8  1                   stoc    OUT6+I
+0000D8  1               .endrepeat
+0000D8  1  CF               jmp     ROLL_AGAIN  ; jump to code that waits for STOP to be released
+0000D9  1               
+0000D9  1               
+0000D9  1               ; ------------------------------------------------------
+0000D9  1               ; Wait for STOP to be released to start rolling again
+0000D9  1               ; ------------------------------------------------------
+0000D9  1  xx xx xx xx  .res $F0-*
+0000DD  1  xx xx xx xx  
+0000E1  1  xx xx xx xx  
+0000E5  1  xx xx xx xx  
+0000E9  1  xx xx xx xx  
+0000ED  1  xx xx xx     
+0000F0  1               
+0000F0  1  19               ld      STOP        ; read the state of STOP input
+0000F1  1  E0               skz                 ; if it is zero skip the next instruction
+0000F2  1  CF               jmp     ROLL_AGAIN  ; it is one jump to reading the state again
+0000F3  1  C0               jmp                 ; if is zero, roll again
+0000F4  1               
+0000F4  1               

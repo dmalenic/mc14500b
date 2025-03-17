@@ -1,0 +1,231 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ./test.s
+Current file: ./test.s
+
+000000r 1               ;
+000000r 1               ; Test
+000000r 1               
+000000r 1               .include "system.inc"
+000000r 2               ;
+000000r 2               ; MC14500 assembler using ca65 macros
+000000r 2               ; Yaroslav Veremenko (c) 2022
+000000r 2               ;
+000000r 2               
+000000r 2               .feature ubiquitous_idents
+000000r 2               .feature string_escapes
+000000r 2               .setcpu "none"
+000000r 2               
+000000r 2               ; 0000 0: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               ; 0001 1: LD   = Data -> RR
+000000r 2               ; 0010 2: LDC  = !Data -> RR
+000000r 2               ; 0011 3: AND  = RR * Data -> RR
+000000r 2               ; 0100 4: ANDC = RR * !Data -> RR
+000000r 2               ; 0101 5: OR   = RR + Data -> RR
+000000r 2               ; 0110 6: ORC  = RR + !Data -> RR
+000000r 2               ; 0111 7: XNOR = RR == Data -> RR
+000000r 2               ; 1000 8: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2               ; 1001 9: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2               ; 1010 A: IEN  = Input enable. D -> IEN.
+000000r 2               ; 1011 B: OEN  = Output enable. D -> OEN.
+000000r 2               ; 1100 C: JMP  = Jump. Jump high.
+000000r 2               ; 1101 D: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2               ; 1110 E: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2               ; 1111 F: NOPF = No change in registers. RR -> RR. FLGF high.
+000000r 2               
+000000r 2               .define I_NOP0 0
+000000r 2               .define I_LD 1
+000000r 2               .define I_LDC 2
+000000r 2               .define I_AND 3
+000000r 2               .define I_ANDC 4
+000000r 2               .define I_OR 5
+000000r 2               .define I_ORC 6
+000000r 2               .define I_XNOR 7
+000000r 2               .define I_STO 8
+000000r 2               .define I_STOC 9
+000000r 2               .define I_IEN 10
+000000r 2               .define I_OEN 11
+000000r 2               .define I_JMP 12
+000000r 2               .define I_RTN 13
+000000r 2               .define I_SKZ 14
+000000r 2               .define I_NOPF 15
+000000r 2               
+000000r 2               RR = $8
+000000r 2               IN1 = $9
+000000r 2               IN2 = $A
+000000r 2               IN3 = $B
+000000r 2               IN4 = $C
+000000r 2               IN5 = $D
+000000r 2               IN6 = $E
+000000r 2               IN7 = $F
+000000r 2               
+000000r 2               MEM0 = $0
+000000r 2               MEM1 = $1
+000000r 2               MEM2 = $2
+000000r 2               MEM3 = $3
+000000r 2               MEM4 = $4
+000000r 2               MEM5 = $5
+000000r 2               MEM6 = $6
+000000r 2               MEM7 = $7
+000000r 2               
+000000r 2               OUT0 = $8
+000000r 2               OUT1 = $9
+000000r 2               OUT2 = $A
+000000r 2               OUT3 = $B
+000000r 2               OUT4 = $C
+000000r 2               OUT5 = $D
+000000r 2               OUT6 = $E
+000000r 2               OUT7 = $F
+000000r 2               
+000000r 2               .macro __lit_instr op, addr
+000000r 2                   .if (addr > $0F)
+000000r 2                       .error "Address overflow"
+000000r 2                   .endif
+000000r 2                   .byte <(((op) << 4) | ((<(addr)) & $0F))
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro __instr op, addr
+000000r 2                   __lit_instr op, addr
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro nop0 addr    ; 0000: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               .ifblank    addr
+000000r 2                   __instr I_NOP0, 0
+000000r 2               .else
+000000r 2                   __instr I_NOP0, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro ld addr      ; 0001: LD
+000000r 2                   __instr I_LD, addr
+000000r 2               .endmacro
+000000r 2               .macro ldc addr     ; 0010: LDC
+000000r 2                   __instr I_LDC, addr
+000000r 2               .endmacro
+000000r 2               .macro and addr     ; 0011: AND
+000000r 2                   __instr I_AND, addr
+000000r 2               .endmacro
+000000r 2               .macro andc addr    ; 0100: ANDC
+000000r 2                   __instr I_ANDC, addr
+000000r 2               .endmacro
+000000r 2               .macro or addr      ; 0101: OR
+000000r 2                   __instr I_OR, addr
+000000r 2               .endmacro
+000000r 2               .macro orc addr     ; 0110: ORC
+000000r 2                   __instr I_ORC, addr
+000000r 2               .endmacro
+000000r 2               .macro xnor addr    ; 0111: XNOR
+000000r 2                   __instr I_XNOR, addr
+000000r 2               .endmacro
+000000r 2               .macro sto addr     ; 1000: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2                   __instr I_STO, addr
+000000r 2               .endmacro
+000000r 2               .macro stoc addr    ; 1001: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2                   __instr I_STOC, addr
+000000r 2               .endmacro
+000000r 2               .macro ien addr     ; 1010: IEN  = Input enable. D -> IEN.
+000000r 2                   __instr I_IEN, addr
+000000r 2               .endmacro
+000000r 2               .macro oen addr     ; 1011: OEN  = Output enable. D -> OEN.
+000000r 2                   __instr I_OEN, addr
+000000r 2               .endmacro
+000000r 2               .macro jmp addr     ; 1100: JMP  = Jump. Jump high.
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_JMP, 0
+000000r 2               .else
+000000r 2                   __instr I_JMP, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro rtn          ; 1101: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2                   __instr I_RTN, 0
+000000r 2               .endmacro
+000000r 2               .macro skz          ; 1110: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2                   __instr I_SKZ, 0
+000000r 2               .endmacro
+000000r 2               .macro nopf addr    ; 1111: NOPF = No change
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_NOPF, 0
+000000r 2               .else
+000000r 2                   __instr I_NOPF, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               
+000000r 1               
+000000r 1               .macro delay
+000000r 1                   .repeat 12,I
+000000r 1                   nop0
+000000r 1                   .endrepeat
+000000r 1               .endmacro
+000000r 1               
+000000r 1               .segment "CODE"
+000000r 1  68               orc     RR     ; 1 -> RR
+000001r 1  A8               ien     RR     ; enable input
+000002r 1  B8               oen     RR     ; enable output
+000003r 1               
+000003r 1               
+000003r 1  80 00 00 00  .repeat 8,I
+000007r 1  00 00 00 00  
+00000Br 1  00 00 00 00  
+00000Fr 1  00 81 00 00  
+000013r 1  00 00 00 00  
+000017r 1  00 00 00 00  
+00001Br 1  00 00 82 00  
+00001Fr 1  00 00 00 00  
+000023r 1  00 00 00 00  
+000027r 1  00 00 00 83  
+00002Br 1  00 00 00 00  
+00002Fr 1  00 00 00 00  
+000033r 1  00 00 00 00  
+000037r 1  84 00 00 00  
+00003Br 1  00 00 00 00  
+00003Fr 1  00 00 00 00  
+000043r 1  00 85 00 00  
+000047r 1  00 00 00 00  
+00004Br 1  00 00 00 00  
+00004Fr 1  00 00 86 00  
+000053r 1  00 00 00 00  
+000057r 1  00 00 00 00  
+00005Br 1  00 00 00 87  
+00005Fr 1  00 00 00 00  
+000063r 1  00 00 00 00  
+000067r 1  00 00 00 00  
+00006Br 1                   sto     MEM0+I
+00006Br 1                   delay
+00006Br 1               .endrepeat
+00006Br 1               
+00006Br 1  90 00 00 00  .repeat 8,I
+00006Fr 1  00 00 00 00  
+000073r 1  00 00 00 00  
+000077r 1  00 91 00 00  
+00007Br 1  00 00 00 00  
+00007Fr 1  00 00 00 00  
+000083r 1  00 00 92 00  
+000087r 1  00 00 00 00  
+00008Br 1  00 00 00 00  
+00008Fr 1  00 00 00 93  
+000093r 1  00 00 00 00  
+000097r 1  00 00 00 00  
+00009Br 1  00 00 00 00  
+00009Fr 1  94 00 00 00  
+0000A3r 1  00 00 00 00  
+0000A7r 1  00 00 00 00  
+0000ABr 1  00 95 00 00  
+0000AFr 1  00 00 00 00  
+0000B3r 1  00 00 00 00  
+0000B7r 1  00 00 96 00  
+0000BBr 1  00 00 00 00  
+0000BFr 1  00 00 00 00  
+0000C3r 1  00 00 00 97  
+0000C7r 1  00 00 00 00  
+0000CBr 1  00 00 00 00  
+0000CFr 1  00 00 00 00  
+0000D3r 1                   stoc     MEM0+I
+0000D3r 1                   delay
+0000D3r 1               .endrepeat
+0000D3r 1               
+0000D3r 1  18 88 19 89  .repeat 8,I
+0000D7r 1  1A 8A 1B 8B  
+0000DBr 1  1C 8C 1D 8D  
+0000DFr 1  1E 8E 1F 8F  
+0000D3r 1                   ld      RR+I
+0000D3r 1                   sto     OUT0+I
+0000D3r 1               .endrepeat
+0000D3r 1               

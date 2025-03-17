@@ -8,6 +8,8 @@
 
 - [MC14500 Demo Programs](#mc14500-demo-programs)
 
+- [My programs for Erturk Kocalar's RetroShield 14500](#my-programs-for-erturk-kocalars-retroshield-14500)
+
 - `github.io` [docs](https://dmalenic.github.io/mc14500b/).
 
 The MC14500 is an Industrial Control Unit (ICU) that is also considered to be a 1-bit processor. Motorola produced it,
@@ -32,7 +34,14 @@ The following related resources were available on 2024-10-21 and may not be avai
 
 - Yaroslav Veremenko's GitHub page [mc14500-programs](https://github.com/veremenko-y/mc14500-programs),
 
-- And Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page.
+- Nicola Cimmino's [PLC-14500](https://github.com/nicolacimmino/PLC-14500) GitHub page. The board is [available on tindie](https://www.tindie.com/products/nicola_cimmino/plc14500-nano-1-bit-single-board-computer-revc/).
+
+- [Erturk Kocalar's](https://8bitforce.com/) `RetroShield 14500 for Arduino Mega`, see Erturk's [GitLab pages](https://gitlab.com/8bitforce) for:
+
+    - [hardware](https://gitlab.com/8bitforce/retroshield-hw/-/tree/master/hardware/k14500b) and.
+    - [software](https://gitlab.com/8bitforce/retroshield-arduino/-/tree/master/k14500b).
+
+  The board is available on [tindie](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/)
 
 ## MC14500 Demo Programs
 
@@ -42,6 +51,8 @@ All programs come in 2 flavors:
 
 - The assembler output adopted for a simulator in [mc14500-sim/projects/](mc14500-sim/programs).
 
+Some are ported to Erturk's [RetroShield 14500](#my-programs-for-erturk-kocalars-retroshield-14500) hardware.
+
 The most interesting demo programs are:
 
 ### One Dimension Conway's Game of Life
@@ -49,6 +60,8 @@ The most interesting demo programs are:
 - [Assembler](mc14500-asm/examples/1d-conways-gol/1d-conways-gol.asm)
 
 - [Simulator](mc14500-sim/programs/1d_conways_gol.js)
+
+- [RetroShield 14400B](./8-bit-force/k14500b_1d_conway_gol)
 
 #### Game Rules
 
@@ -280,6 +293,8 @@ Others are my original work.
 
     - [Simulator](mc14500-sim/programs/roll_a_die.js).
 
+    - [RetroShield 14500](./8-bit-force/k14500b_roll_a_die)
+
 - __Running Lights__: This program simulates a running light effect like a Christmas tree decoration. It is adapted from
   Urs Lindegger's collection.
 
@@ -482,3 +497,16 @@ Others are my original work.
   correctly.
 
     - [Assembler](mc14500-asm/examples/org_and_equ_tests)
+
+## My Programs for Erturk Kocalar's RetroShield 14500
+
+I have [ported](./8-bit-force/) a few demo programs to Erturk Kocalar's [RetroShield 14500 for Arduino Mega](https://gitlab.com/8bitforce/retroshield-hw/-/tree/master/hardware/k14500b)
+that is available on [tindie](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/).
+
+- [1D Conway's Game of Life](./8-bit-force/k14500b_1d_conway_gol) is the port of [One Dimension Conway's Game of Life](#one-dimension-conways-game-of-life).
+
+- [Roll a Die](./8-bit-force/k14500b_roll_a_die) is another port of a [demo program](#other-demo-programs).
+
+- [Stick 'n Rudder](./8-bit-force/k14500b_stick_n_rudder) is example how to contol the real hardware using MC14500B.
+
+See [Erturk's GitLab page](https://gitlab.com/8bitforce/retroshield-arduino/-/tree/master/k14500b) for more programs.

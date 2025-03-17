@@ -1,0 +1,587 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ./1d-conways-gol.s
+Current file: ./1d-conways-gol.s
+
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; One-dimensional Conway's Game of Life:
+000000r 1               ;  * A cell becomes alive if it has exactly one live neighbor.
+000000r 1               ;  * A cell dies if it has zero or two live neighbors.
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; Operating instructions:
+000000r 1               ;  * 5 inputs define 5 bits of the initial state,
+000000r 1               ;  * 7 outputs reflects 7 bits of automaton output,
+000000r 1               ;  * Internal state is held in MEM0..MEM6, output is displayed on OUT0..OUT6
+000000r 1               ;  * As long as the input IN6 is low the inputs IN1..IN5 are copied to MEM1 to MEM5, MEM0
+000000r 1               ;    and MEM6 are assumed initially 0. Internal state is reflected on outputs OUT0..OUT6
+000000r 1               ;  * As long as the input IN6 is high the next state of the game of life is being continuously
+000000r 1               ;    calculated, and outputs are updated.
+000000r 1               ; ------------------------------------------------------
+000000r 1               
+000000r 1               
+000000r 1               .include "system.inc"
+000000r 2               ;
+000000r 2               ; MC14500 assembler using ca65 macros
+000000r 2               ; Yaroslav Veremenko (c) 2022
+000000r 2               ;
+000000r 2               
+000000r 2               .feature ubiquitous_idents
+000000r 2               .feature string_escapes
+000000r 2               .setcpu "none"
+000000r 2               
+000000r 2               ; 0000 0: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               ; 0001 1: LD   = Data -> RR
+000000r 2               ; 0010 2: LDC  = !Data -> RR
+000000r 2               ; 0011 3: AND  = RR * Data -> RR
+000000r 2               ; 0100 4: ANDC = RR * !Data -> RR
+000000r 2               ; 0101 5: OR   = RR + Data -> RR
+000000r 2               ; 0110 6: ORC  = RR + !Data -> RR
+000000r 2               ; 0111 7: XNOR = RR == Data -> RR
+000000r 2               ; 1000 8: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2               ; 1001 9: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2               ; 1010 A: IEN  = Input enable. D -> IEN.
+000000r 2               ; 1011 B: OEN  = Output enable. D -> OEN.
+000000r 2               ; 1100 C: JMP  = Jump. Jump high.
+000000r 2               ; 1101 D: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2               ; 1110 E: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2               ; 1111 F: NOPF = No change in registers. RR -> RR. FLGF high.
+000000r 2               
+000000r 2               .define I_NOP0 0
+000000r 2               .define I_LD 1
+000000r 2               .define I_LDC 2
+000000r 2               .define I_AND 3
+000000r 2               .define I_ANDC 4
+000000r 2               .define I_OR 5
+000000r 2               .define I_ORC 6
+000000r 2               .define I_XNOR 7
+000000r 2               .define I_STO 8
+000000r 2               .define I_STOC 9
+000000r 2               .define I_IEN 10
+000000r 2               .define I_OEN 11
+000000r 2               .define I_JMP 12
+000000r 2               .define I_RTN 13
+000000r 2               .define I_SKZ 14
+000000r 2               .define I_NOPF 15
+000000r 2               
+000000r 2               RR = $8
+000000r 2               IN1 = $9
+000000r 2               IN2 = $A
+000000r 2               IN3 = $B
+000000r 2               IN4 = $C
+000000r 2               IN5 = $D
+000000r 2               IN6 = $E
+000000r 2               IN7 = $F
+000000r 2               
+000000r 2               MEM0 = $0
+000000r 2               MEM1 = $1
+000000r 2               MEM2 = $2
+000000r 2               MEM3 = $3
+000000r 2               MEM4 = $4
+000000r 2               MEM5 = $5
+000000r 2               MEM6 = $6
+000000r 2               MEM7 = $7
+000000r 2               
+000000r 2               OUT0 = $8
+000000r 2               OUT1 = $9
+000000r 2               OUT2 = $A
+000000r 2               OUT3 = $B
+000000r 2               OUT4 = $C
+000000r 2               OUT5 = $D
+000000r 2               OUT6 = $E
+000000r 2               OUT7 = $F
+000000r 2               
+000000r 2               .macro __lit_instr op, addr
+000000r 2                   .if (addr > $0F)
+000000r 2                       .error "Address overflow"
+000000r 2                   .endif
+000000r 2                   .byte <(((op) << 4) | ((<(addr)) & $0F))
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro __instr op, addr
+000000r 2                   __lit_instr op, addr
+000000r 2               .endmacro
+000000r 2               
+000000r 2               .macro nop0 addr    ; 0000: NOP0 = No change in registers. RR -> RR. FLG0 high.
+000000r 2               .ifblank    addr
+000000r 2                   __instr I_NOP0, 0
+000000r 2               .else
+000000r 2                   __instr I_NOP0, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro ld addr      ; 0001: LD
+000000r 2                   __instr I_LD, addr
+000000r 2               .endmacro
+000000r 2               .macro ldc addr     ; 0010: LDC
+000000r 2                   __instr I_LDC, addr
+000000r 2               .endmacro
+000000r 2               .macro and addr     ; 0011: AND
+000000r 2                   __instr I_AND, addr
+000000r 2               .endmacro
+000000r 2               .macro andc addr    ; 0100: ANDC
+000000r 2                   __instr I_ANDC, addr
+000000r 2               .endmacro
+000000r 2               .macro or addr      ; 0101: OR
+000000r 2                   __instr I_OR, addr
+000000r 2               .endmacro
+000000r 2               .macro orc addr     ; 0110: ORC
+000000r 2                   __instr I_ORC, addr
+000000r 2               .endmacro
+000000r 2               .macro xnor addr    ; 0111: XNOR
+000000r 2                   __instr I_XNOR, addr
+000000r 2               .endmacro
+000000r 2               .macro sto addr     ; 1000: STO  = Store. RR -> Data. Write high if OEN.
+000000r 2                   __instr I_STO, addr
+000000r 2               .endmacro
+000000r 2               .macro stoc addr    ; 1001: STOC = Store complement. QRR -> Data. Write high if OEN.
+000000r 2                   __instr I_STOC, addr
+000000r 2               .endmacro
+000000r 2               .macro ien addr     ; 1010: IEN  = Input enable. D -> IEN.
+000000r 2                   __instr I_IEN, addr
+000000r 2               .endmacro
+000000r 2               .macro oen addr     ; 1011: OEN  = Output enable. D -> OEN.
+000000r 2                   __instr I_OEN, addr
+000000r 2               .endmacro
+000000r 2               .macro jmp addr     ; 1100: JMP  = Jump. Jump high.
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_JMP, 0
+000000r 2               .else
+000000r 2                   __instr I_JMP, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               .macro rtn          ; 1101: RTN  = Return. RTN high. 1 -> Skip.
+000000r 2                   __instr I_RTN, 0
+000000r 2               .endmacro
+000000r 2               .macro skz          ; 1110: SKZ  = Skip if zero. 1 -> Skip if RR == 0.
+000000r 2                   __instr I_SKZ, 0
+000000r 2               .endmacro
+000000r 2               .macro nopf addr    ; 1111: NOPF = No change
+000000r 2               .ifblank   addr
+000000r 2                   __instr I_NOPF, 0
+000000r 2               .else
+000000r 2                   __instr I_NOPF, addr
+000000r 2               .endif
+000000r 2               .endmacro
+000000r 2               
+000000r 1               
+000000r 1               
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               ; ------------------------------------------------------
+000000r 1               ; Enable inputs and outputs
+000000r 1               ; ------------------------------------------------------
+000000r 1  68               orc     RR          ; force 1 into RR reqardless whether inputs and outputs were enabled
+000001r 1  A8               ien     RR          ; enable inputs
+000002r 1  B8               oen     RR          ; enable outputs
+000003r 1               
+000003r 1               ; ------------------------------------------------------
+000003r 1               ; If the input IN6 is LOW then the program is in the initialization mode i.e.
+000003r 1               ; a user can define the initial state by changing inputs IN1 to IN5.
+000003r 1               ; If the input IN6 is HIGH then the program is in the calculation mode and
+000003r 1               ; the next state of the cellular automaton is calculated.
+000003r 1               ; In the calculation mode inputs and outputs should be disabled in the following
+000003r 1               ; code block.
+000003r 1               ; ------------------------------------------------------
+000003r 1  2E               ldc     IN6
+000004r 1  B8               oen     RR
+000005r 1  A8               ien     RR
+000006r 1               
+000006r 1               ; ------------------------------------------------------
+000006r 1               ; To get the immediate visual feedback, the state of IN1 to IN5 is copied
+000006r 1               ; to ram MEM1 to MEM5, and to outputs OUT1 to OUT5. MEM0, MEM6, OUT0 and OUT6 are set to 0.
+000006r 1               ; ------------------------------------------------------
+000006r 1  19               ld      IN1
+000007r 1  81               sto     MEM1
+000008r 1  89               sto     OUT1
+000009r 1  1A               ld      IN2
+00000Ar 1  82               sto     MEM2
+00000Br 1  8A               sto     OUT2
+00000Cr 1  1B               ld      IN3
+00000Dr 1  83               sto     MEM3
+00000Er 1  8B               sto     OUT3
+00000Fr 1  1C               ld      IN4
+000010r 1  84               sto     MEM4
+000011r 1  8C               sto     OUT4
+000012r 1  1D               ld      IN5
+000013r 1  85               sto     MEM5
+000014r 1  8D               sto     OUT5
+000015r 1                   ; MEM0, MEM6 and MEM7, as well as OUT0, OUT6 and OUT7 are initially 0
+000015r 1  68               orc     RR
+000016r 1  90               stoc    MEM0
+000017r 1  98               stoc    OUT0
+000018r 1  96               stoc    MEM6
+000019r 1  9E               stoc    OUT6
+00001Ar 1  97               stoc    MEM7
+00001Br 1  9F               stoc    OUT7
+00001Cr 1               
+00001Cr 1               ; If IN6 was HIGH the input was disabled by the previous block.
+00001Cr 1               ; Therefore, it is necessary to enable input and output and test IN6 again
+00001Cr 1               ; to determine if we are in the initialization or in the calculation mode.
+00001Cr 1  68               orc     RR
+00001Dr 1  B8               oen     RR
+00001Er 1  A8               ien     RR
+00001Fr 1               ; If IN6 is LOW we are in the initialization mode, jump to the beginning
+00001Fr 1               ; and skip the rest of the program. This makes the initialization mode more
+00001Fr 1               ; responsive.
+00001Fr 1  2E               ldc     IN6
+000020r 1  E0               skz
+000021r 1  C0               jmp
+000022r 1               
+000022r 1               ; ------------------------------------------------------
+000022r 1               ; If this point is reached, we are in the calculation mode,
+000022r 1               ; inputs and outputs are enabled and the input IN6 is HIGH
+000022r 1               ; and we should calculate the next state of the cellular automaton.
+000022r 1               ; ------------------------------------------------------
+000022r 1               
+000022r 1               ; ------------------------------------------------------
+000022r 1               ; The cellular automaton state should be updated 3 to 4 times a second to get
+000022r 1               ; the best visual effect. This is controlled by the timer.
+000022r 1               ; If timer is on, then do not proceed with the calculation
+000022r 1               ; and jump to the beginning of the program.
+000022r 1               ; ------------------------------------------------------
+000022r 1  1F               ld      IN7
+000023r 1  E0               skz
+000024r 1  C0               jmp
+000025r 1               
+000025r 1               ; ------------------------------------------------------
+000025r 1               ; The rest of the program calculates the next state of the cellular automaton.
+000025r 1               ; ------------------------------------------------------
+000025r 1               ; 3 bits of the internal state are required to calculate the next state. As we have only 8 bits
+000025r 1               ; available, and the internal state requires 7 bits, the last two bits of the internal
+000025r 1               ; state that would normally be held in MEM5 and MEM6 are made implicit using the following
+000025r 1               ; strategy:
+000025r 1               ;  * the program is divided into 4 similar sections:
+000025r 1               ;  * depending on the state of MEM5 or MEM6 the section has inputs and output either
+000025r 1               ;    enabled or disabled. If it has inputs and outputs enabled, its code takes into the
+000025r 1               ;    account the state of MEM5 and MEM6 implicitly and is free to use those locations as
+000025r 1               ;    temporary storage while calculating the new state. At the end of the calculation,
+000025r 1               ;    MEM0 to MEM6 hold the new state, and the calculation is marked as done by setting
+000025r 1               ;    the MEM7 to 1. The following sections will have inputs and outputs disabled.
+000025r 1               ;  * section 1 calculates the next state if RAM bits 5 and 6 are both 0
+000025r 1               ;  * section 2 calculates the next state if RAM bits 5 is 0 and bit 6 is 1
+000025r 1               ;  * section 3 calculates the next state if RAM bits 5 is 1 and bit 6 is 0
+000025r 1               ;  * section 4 calculates the next state if RAM bits 5 and 6 are both 1
+000025r 1               ; The comments describing the algorithm that calculates the next state use
+000025r 1               ; the following notation:
+000025r 1               ;  * a denotes a state of bit 0, initially and finally in MEM0
+000025r 1               ;  * b denotes a state of bit 1, initially and finally in MEM1
+000025r 1               ;  * c denotes a state of bit 2, initially and finally in MEM2
+000025r 1               ;  * d denotes a state of bit 3, initially and finally in MEM3
+000025r 1               ;  * e denotes a state of bit 4, initially and finally in MEM4
+000025r 1               ;  * f denotes state of bit 5, initially and finally in MEM5
+000025r 1               ;  * g denotes a state of bit 7, initially and finally in MEM6
+000025r 1               ;  * x denotes, don't care
+000025r 1               ;  * 1 or 0 denotes the constant value in a given RAM bit
+000025r 1               ;  * the new (changed) state of a bit is denoted using a', b', etc.
+000025r 1               ;  * for example:
+000025r 1               ;     * the sequence a' b c d e b 0 x is interpreted as
+000025r 1               ;       a' in MEM0, b in MEM1, c in MEM2, d in MEM3, e in MEM4, b in MEM5, 0 in MEM6,
+000025r 1               ;       x in MEM7 is don't care
+000025r 1               ;     * the transformation a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d is interpreted as
+000025r 1               ;       changing the state c in MEM2 to c', by XORing the current state of b in MEM6
+000025r 1               ;       with the new state of d in MEM3
+000025r 1               ; ------------------------------------------------------
+000025r 1               
+000025r 1               ; ------------------------------------------------------
+000025r 1               ; If this point has been reached we must initialize a next state calculation.
+000025r 1               ;  * set RAM bit 7 to 0 to indicate that the calculation has not been performed yet.
+000025r 1               ; ------------------------------------------------------
+000025r 1  68               orc     RR
+000026r 1  97               stoc    MEM7
+000027r 1               
+000027r 1               ; ------------------------------------------------------
+000027r 1               ; section 1: f=0, g=0
+000027r 1               ; ------------------------------------------------------
+000027r 1               ;  * input and output are enabled
+000027r 1               ;  * keep inputs and outputs enabled only if RAM bit 5, 6 and 7 are 0
+000027r 1               ; ------------------------------------------------------
+000027r 1  27               ldc     MEM7
+000028r 1  45               andc    MEM5
+000029r 1  46               andc    MEM6
+00002Ar 1  A8               ien     RR
+00002Br 1  B8               oen     RR
+00002Cr 1               
+00002Cr 1               ; section 1, algorithm:
+00002Cr 1               ; a b c d e 0 0 x -> a b c d e a a a
+00002Cr 1  10               ld      MEM0
+00002Dr 1  85               sto     MEM5
+00002Er 1  86               sto     MEM6
+00002Fr 1  87               sto     MEM7
+000030r 1               ; a b c d e a a a -> a'b c d e a a a, a'=b^g=b^0=b
+000030r 1  11               ld      MEM1
+000031r 1  80               sto     MEM0
+000032r 1               ; a'b c d e a a a -> a'b c d e b b a
+000032r 1  11               ld      MEM1
+000033r 1  85               sto     MEM5
+000034r 1  86               sto     MEM6
+000035r 1               ; a'b c d e b b a -> a'b'c d e b b a, b'=a^c
+000035r 1  17               ld      MEM7
+000036r 1  72               xnor    MEM2
+000037r 1  91               stoc    MEM1
+000038r 1               ; a'b'c d e b b a -> a'b'c d e c b a
+000038r 1  12               ld      MEM2
+000039r 1  85               sto     MEM5
+00003Ar 1               ; a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d
+00003Ar 1  13               ld      MEM3
+00003Br 1  76               xnor    MEM6
+00003Cr 1  92               stoc    MEM2
+00003Dr 1               ; a'b'c'd e c b a -> a'b'c'd e c d a
+00003Dr 1  13               ld      MEM3
+00003Er 1  86               sto     MEM6
+00003Fr 1               ; a'b'c'd e c d a -> a'b'c'd'e c d a, d'=c^e
+00003Fr 1  14               ld      MEM4
+000040r 1  75               xnor    MEM5
+000041r 1  93               stoc    MEM3
+000042r 1               ; a'b'c'd'e c d a -> a'b'c'd'e e d a
+000042r 1  14               ld      MEM4
+000043r 1  85               sto     MEM5
+000044r 1               ; a'b'c'd'e e d a -> a'b'c'd'e'e d a, e'=d^f=d^0=d
+000044r 1  16               ld      MEM6
+000045r 1  84               sto     MEM4
+000046r 1               ; a'b'c'd'e'e d a -> a'b'c'd'e'f'd a, f'=e^g=e^0=e -> NOOP
+000046r 1               ; a'b'c'd'e'f'd a -> a'b'c'd'e'f'g'a, g'=f^a=0^a=a
+000046r 1  17               ld      MEM7
+000047r 1  86               sto     MEM6
+000048r 1               
+000048r 1               ; mark section 1 as done
+000048r 1               ; Note: MEM7 was 0 if inputs and outputs were enabled for the section.
+000048r 1               ;       This will be set to 1 only if the input and output were enabled in this section.
+000048r 1  17               ld      MEM7
+000049r 1  67               orc     MEM7
+00004Ar 1  87               sto     MEM7
+00004Br 1               
+00004Br 1               ; enable inputs and outputs so we can test the next section precondition
+00004Br 1  68               orc     RR
+00004Cr 1  A8               ien     RR
+00004Dr 1  B8               oen     RR
+00004Er 1               
+00004Er 1               ; ------------------------------------------------------
+00004Er 1               ; section 2: f=1, g=0
+00004Er 1               ; ------------------------------------------------------
+00004Er 1               ;  * input and output are enabled
+00004Er 1               ;  * keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 5 is 1
+00004Er 1               ; ------------------------------------------------------
+00004Er 1  27               ldc     MEM7
+00004Fr 1  35               and     MEM5
+000050r 1  46               andc    MEM6
+000051r 1  A8               ien     RR
+000052r 1  B8               oen     RR
+000053r 1               
+000053r 1               ; section 2, algorithm:
+000053r 1               ; a b c d e 1 0 x -> a b c d e a a a
+000053r 1  10               ld      MEM0
+000054r 1  85               sto     MEM5
+000055r 1  86               sto     MEM6
+000056r 1  87               sto     MEM7
+000057r 1               ; a b c d e a a a -> a'b c d e a a a, a'=b^g=b^0=b
+000057r 1  11               ld      MEM1
+000058r 1  80               sto     MEM0
+000059r 1               ; a'b c d e a a a -> a'b c d e b b a
+000059r 1  11               ld      MEM1
+00005Ar 1  85               sto     MEM5
+00005Br 1  86               sto     MEM6
+00005Cr 1               ; a'b c d e b b a -> a'b'c d e b b a, b'=a^c
+00005Cr 1  17               ld      MEM7
+00005Dr 1  72               xnor    MEM2
+00005Er 1  91               stoc    MEM1
+00005Fr 1               ; a'b'c d e b b a -> a'b'c d e c b a
+00005Fr 1  12               ld      MEM2
+000060r 1  85               sto     MEM5
+000061r 1               ; a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d
+000061r 1  13               ld      MEM3
+000062r 1  76               xnor    MEM6
+000063r 1  92               stoc    MEM2
+000064r 1               ; a'b'c'd e c b a -> a'b'c'd e c d a
+000064r 1  13               ld      MEM3
+000065r 1  86               sto     MEM6
+000066r 1               ; a'b'c'd e c d a -> a'b'c'd'e c d a, d'=c^e
+000066r 1  14               ld      MEM4
+000067r 1  75               xnor    MEM5
+000068r 1  93               stoc    MEM3
+000069r 1               ; a'b'c'd'e c d a -> a'b'c'd'e e d a
+000069r 1  14               ld      MEM4
+00006Ar 1  85               sto     MEM5
+00006Br 1               ; a'b'c'd'e e d a -> a'b'c'd'e'e d a, e'=d^f=d^1=!d
+00006Br 1  26               ldc     MEM6
+00006Cr 1  84               sto     MEM4
+00006Dr 1               ; a'b'c'd'e'e d a -> a'b'c'd'e'f'd a, f'=e^g=e^0=e -> NOOP
+00006Dr 1               ; a'b'c'd'e'f'd a -> a'b'c'd'e'f'g'a, g'=f^a=1^a=!a
+00006Dr 1  27               ldc     MEM7
+00006Er 1  86               sto     MEM6
+00006Fr 1               
+00006Fr 1               ; mark section 2 as done
+00006Fr 1               ; Note: MEM7 was 0 if inputs and outputs were enabled for the section.
+00006Fr 1               ;       This will be set to 1 only if the input and output were enabled in this section.
+00006Fr 1  17               ld      MEM7
+000070r 1  67               orc     MEM7
+000071r 1  87               sto     MEM7
+000072r 1               
+000072r 1               ; enable inputs and outputs so we can test the next section precondition
+000072r 1  68               orc     RR
+000073r 1  A8               ien     RR
+000074r 1  B8               oen     RR
+000075r 1               
+000075r 1               ; ------------------------------------------------------
+000075r 1               ; section 3: f=0, g=1
+000075r 1               ; ------------------------------------------------------
+000075r 1               ;  * input and output are enabled
+000075r 1               ;  * keep inputs and outputs enabled only if RAM bit 6, and 7 are 0 and RAM bit 6 is 1
+000075r 1               ; ------------------------------------------------------
+000075r 1  27               ldc     MEM7
+000076r 1  45               andc    MEM5
+000077r 1  36               and     MEM6
+000078r 1  A8               ien     RR
+000079r 1  B8               oen     RR
+00007Ar 1               
+00007Ar 1               ; section 3, algorithm:
+00007Ar 1               ; a b c d e 0 1 x -> a b c d e a a a
+00007Ar 1  10               ld      MEM0
+00007Br 1  85               sto     MEM5
+00007Cr 1  86               sto     MEM6
+00007Dr 1  87               sto     MEM7
+00007Er 1               ; a b c d e a a a -> a'b c d e a a a, a'=b^g=b^1=!b
+00007Er 1  21               ldc     MEM1
+00007Fr 1  80               sto     MEM0
+000080r 1               ; a'b c d e a a a -> a'b c d e b b a
+000080r 1  11               ld      MEM1
+000081r 1  85               sto     MEM5
+000082r 1  86               sto     MEM6
+000083r 1               ; a'b c d e b b a -> a'b'c d e b b a, b'=a^c
+000083r 1  17               ld      MEM7
+000084r 1  72               xnor    MEM2
+000085r 1  91               stoc    MEM1
+000086r 1               ; a'b'c d e b b a -> a'b'c d e c b a
+000086r 1  12               ld      MEM2
+000087r 1  85               sto     MEM5
+000088r 1               ; a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d
+000088r 1  13               ld      MEM3
+000089r 1  76               xnor    MEM6
+00008Ar 1  92               stoc    MEM2
+00008Br 1               ; a'b'c'd e c b a -> a'b'c'd e c d a
+00008Br 1  13               ld      MEM3
+00008Cr 1  86               sto     MEM6
+00008Dr 1               ; a'b'c'd e c d a -> a'b'c'd'e c d a, d'=c^e
+00008Dr 1  14               ld      MEM4
+00008Er 1  75               xnor    MEM5
+00008Fr 1  93               stoc    MEM3
+000090r 1               ; a'b'c'd'e c d a -> a'b'c'd'e e d a
+000090r 1  14               ld      MEM4
+000091r 1  85               sto     MEM5
+000092r 1               ; a'b'c'd'e e d a -> a'b'c'd'e'e d a, e'=d^f=d^0=d
+000092r 1  16               ld      MEM6
+000093r 1  84               sto     MEM4
+000094r 1               ; a'b'c'd'e'e d a -> a'b'c'd'e'f'd a, f'=e^g=e^1=!e
+000094r 1  25               ldc     MEM5
+000095r 1  85               sto     MEM5
+000096r 1               ; a'b'c'd'e'f'd a -> a'b'c'd'e'f'g'a, g'=f^a=0^a=a
+000096r 1  17               ld      MEM7
+000097r 1  86               sto     MEM6
+000098r 1               
+000098r 1               ; mark section 3 as done
+000098r 1               ; Note: MEM7 was 0 if inputs and outputs were enabled for the section.
+000098r 1               ;       This will be set to 1 only if the input and output were enabled in this section.
+000098r 1  17               ld      MEM7
+000099r 1  67               orc     MEM7
+00009Ar 1  87               sto     MEM7
+00009Br 1               
+00009Br 1               ; enable inputs and outputs so we can test the next section precondition
+00009Br 1  68               orc     RR
+00009Cr 1  A8               ien     RR
+00009Dr 1  B8               oen     RR
+00009Er 1               
+00009Er 1               ; ------------------------------------------------------
+00009Er 1               ; section 4: f=1, g=1
+00009Er 1               ; ------------------------------------------------------
+00009Er 1               ;  * input and output are enabled
+00009Er 1               ;  * keep inputs and outputs enabled only if RAM bit 7 is 0 and RAM 5 and 6 are 1
+00009Er 1               ; ------------------------------------------------------
+00009Er 1  27               ldc     MEM7
+00009Fr 1  35               and     MEM5
+0000A0r 1  36               and     MEM6
+0000A1r 1  A8               ien     RR
+0000A2r 1  B8               oen     RR
+0000A3r 1               
+0000A3r 1               ; section 4, algorithm:
+0000A3r 1               ; a b c d e 1 1 x -> a b c d e a a a
+0000A3r 1  10               ld      MEM0
+0000A4r 1  85               sto     MEM5
+0000A5r 1  86               sto     MEM6
+0000A6r 1  87               sto     MEM7
+0000A7r 1               ; a b c d e a a a -> a'b c d e a a a, a'=b^g=b^1=!b
+0000A7r 1  21               ldc     MEM1
+0000A8r 1  80               sto     MEM0
+0000A9r 1               ; a'b c d e a a a -> a'b c d e b b a
+0000A9r 1  11               ld      MEM1
+0000AAr 1  85               sto     MEM5
+0000ABr 1  86               sto     MEM6
+0000ACr 1               ; a'b c d e b b a -> a'b'c d e b b a, b'=a^c
+0000ACr 1  17               ld      MEM7
+0000ADr 1  72               xnor    MEM2
+0000AEr 1  91               stoc    MEM1
+0000AFr 1               ; a'b'c d e b b a -> a'b'c d e c b a
+0000AFr 1  12               ld      MEM2
+0000B0r 1  85               sto     MEM5
+0000B1r 1               ; a'b'c d e c b a -> a'b'c'd e c b a, c'=b^d
+0000B1r 1  13               ld      MEM3
+0000B2r 1  76               xnor    MEM6
+0000B3r 1  92               stoc    MEM2
+0000B4r 1               ; a'b'c'd e c b a -> a'b'c'd e c d a
+0000B4r 1  13               ld      MEM3
+0000B5r 1  86               sto     MEM6
+0000B6r 1               ; a'b'c'd e c d a -> a'b'c'd'e c d a, d'=c^e
+0000B6r 1  14               ld      MEM4
+0000B7r 1  75               xnor    MEM5
+0000B8r 1  93               stoc    MEM3
+0000B9r 1               ; a'b'c'd'e c d a -> a'b'c'd'e e d a
+0000B9r 1  14               ld      MEM4
+0000BAr 1  85               sto     MEM5
+0000BBr 1               ; a'b'c'd'e e d a -> a'b'c'd'e'e d a, e'=d^f=d^1=!d
+0000BBr 1  26               ldc     MEM6
+0000BCr 1  84               sto     MEM4
+0000BDr 1               ; a'b'c'd'e'e d a -> a'b'c'd'e'f'd a, f'=e^g=e^1=!e
+0000BDr 1  25               ldc     MEM5
+0000BEr 1  85               sto     MEM5
+0000BFr 1               ; a'b'c'd'e'f'd a -> a'b'c'd'e'f'g'a, g'=f^a=1^a=!a
+0000BFr 1  27               ldc     MEM7
+0000C0r 1  86               sto     MEM6
+0000C1r 1               
+0000C1r 1               ; section 4 is the last one so no need to mark it as done
+0000C1r 1               
+0000C1r 1               ; ------------------------------------------------------
+0000C1r 1               ; We are done, copy the internal state of the automaton to the output registers.
+0000C1r 1               ; At this point we don't know if inputs and outputs are enabled or not so we must
+0000C1r 1               ; re-enable them.
+0000C1r 1               ; ------------------------------------------------------
+0000C1r 1  68               orc     RR
+0000C2r 1  A8               ien     RR
+0000C3r 1  B8               oen     RR
+0000C4r 1               
+0000C4r 1               ; ------------------------------------------------------
+0000C4r 1               ; copy the new state of the automaton from registers MEM0 to MEM6 into
+0000C4r 1               ; output registers OUT0 to OUT6
+0000C4r 1               ; ------------------------------------------------------
+0000C4r 1  10               ld      MEM0
+0000C5r 1  88               sto     OUT0
+0000C6r 1  11               ld      MEM1
+0000C7r 1  89               sto     OUT1
+0000C8r 1  12               ld      MEM2
+0000C9r 1  8A               sto     OUT2
+0000CAr 1  13               ld      MEM3
+0000CBr 1  8B               sto     OUT3
+0000CCr 1  14               ld      MEM4
+0000CDr 1  8C               sto     OUT4
+0000CEr 1  15               ld      MEM5
+0000CFr 1  8D               sto     OUT5
+0000D0r 1  16               ld      MEM6
+0000D1r 1  8E               sto     OUT6
+0000D2r 1               
+0000D2r 1               ; ------------------------------------------------------
+0000D2r 1               ; Start the timer to delay the next state calculation and let a user observe the
+0000D2r 1               ; current of the cellular automaton
+0000D2r 1               ; ------------------------------------------------------
+0000D2r 1  68               orc     RR
+0000D3r 1  B8               oen     RR
+0000D4r 1  8F               sto     OUT7
+0000D5r 1  9F               stoc    OUT7
+0000D6r 1               
+0000D6r 1  C0               jmp
+0000D7r 1               
+0000D7r 1               
