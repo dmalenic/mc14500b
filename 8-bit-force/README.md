@@ -1,6 +1,6 @@
 # Programs for Erturk Kocalar's RetroShield 14500
 
-MC14500B example programs targeting Erturk Kocalar's [RetroShield 145000](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/).
+MC14500B example programs targeting Erturk Kocalar's [RetroShield 14500](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/).
 
 [1D Conway's Game of Life](./k14500b_1d_conway_gol)
 
