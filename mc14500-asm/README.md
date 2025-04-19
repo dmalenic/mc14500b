@@ -486,4 +486,3 @@ The examples assume that they are executed from the [examples](examples) directo
   
   ```
   No output file is produced.
-
