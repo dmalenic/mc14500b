@@ -501,7 +501,7 @@ Others are my original work.
 ## My Programs for Erturk Kocalar's RetroShield 14500
 
 I have [ported](./8-bit-force/) a few demo programs to Erturk Kocalar's [RetroShield 14500 for Arduino Mega](https://gitlab.com/8bitforce/retroshield-hw/-/tree/master/hardware/k14500b)
-that is available on [tindie](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/).
+(available on [tindie](https://www.tindie.com/products/8bitforce/retroshield-14500-for-arduino-mega/)).
 
 - [1D Conway's Game of Life](./8-bit-force/k14500b_1d_conway_gol) is the port of [One Dimension Conway's Game of Life](#one-dimension-conways-game-of-life).
 

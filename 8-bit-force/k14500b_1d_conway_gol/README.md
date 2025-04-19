@@ -18,5 +18,3 @@ Chapter 12 Adding Jumps, Conditional Branches, and Subroutines.
 The `JMP`, `NOP0`, and `NOPF` commands differ slightly  from the original Erturk's code. 
 It also required a slight modification of Yaroslav's `system.inc` to allow NOP0 and NOPF to accept an argument.
 The code for `killbit` and `serial hello` in `memorymap.h` is modified accordingly.
-
-`firmware/cc65` contains the 

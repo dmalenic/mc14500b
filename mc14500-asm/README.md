@@ -9,7 +9,7 @@ The latest version Urs published was 0.4. This project continues with version 0.
 
 The original was written in Python 2, which was the right choice for 2010 but is no longer supported. Version 0.5 is
 written in Python 3. New features are added to the assembler and disassembler. More about it later. It is tested on
-Linux and MacOSX but is expected to work on Windows without modifications. Python 3.10 or newer is needed.
+Linux and macOS but is expected to work on Windows without modifications. Python 3.10 or newer is needed.
 
 ## The Overall Project Structure
 
@@ -55,7 +55,7 @@ Linux and MacOSX but is expected to work on Windows without modifications. Pytho
 
 - Each example subdirectory contains its own `Makefile` defining the concrete build targets for that particular example.
 
-- [examples/include](examples/include) contains assembler files with frequently needed declarations and code snippets that other
+- [examples/include](examples/include) contains assembler files with frequently required declarations and code snippets that other
   assembler files can include. The mnemonics for inputs, outputs, and RAM locations can be found there. A chapter on
   the `mc14500.py` assembler program will describe the inclusion mechanism and mnemonics declarations.
 
@@ -67,9 +67,9 @@ Makefile can be invoked with the following arguments that will be internally pas
 - `MEM_WIDTH=<memory-width>`, where _memory-width_ is the width of MC14500 ROM word in bits. The acceptable values are
   `8`, `12`, or `16`. The default value is `8`.
 
-- `INSTR_POSITION=<instruction-position>`, where _instruction-position_ is the position of 4 instruction op-code bits
-  within the MC14500 ROM word. The acceptable values are `first` and `last`. `first` indicates that the 4 most
-  significant bits are used to encode the MC14500B instruction op-code, and `last` indicates that the 4 least
+- `INSTR_POSITION=<instruction-position>`, where _instruction-position_ is the position of 4-bit instruction op-code
+  within the MC14500 ROM word. The acceptable values are `first` and `last`. `first` indicates that the four most
+  significant bits are used to encode the MC14500B instruction op-code, and `last` indicates that the four least
   significant bits are used to encode the MC14500B instruction op-code. The default value is `last`.
 
 - `NON_PROGRAMED_MEMORY=<non-programmed-memory-value>`, indicating the value to be written into memory locations that
@@ -114,8 +114,8 @@ options:
 ### Description
 
 The `mc14500.py` is the MC14500B assembler written in Python 3. It takes an input file as the argument and, if no error
-has been encountered, creates at least 3 output files. The names of created output files are derived from the name of
-the input file with the extension replaced:
+has been encountered, creates at least three output files. The names of created output files are derived from the name
+of the input file with the extension replaced:
 
 - The listing file shows a generated machine code for every assembler instruction from the input file. It has a `.lst`
   extension.
@@ -148,7 +148,7 @@ containing the exact error messages written to `stderr`. The program exit value 
 - `-b`, `--binary` output assembled machine code in a raw binary format. The output file has a `.bin` extension.
 
 - `-d DEPTH`, `--depth DEPTH` is the depth of program ROM in words, i.e., the maximal MC14500 instructions for an
-  assembled program. Allowed values are all positive multiples of 128 up to and including 65536. The default value
+  assembled program. Allowed values are all positive multiples of 128 up to and including 65,536. The default value
   is 256.
 
 - `-h`, `--help` show the program help information, and exit.
@@ -156,9 +156,9 @@ containing the exact error messages written to `stderr`. The program exit value 
 - `-I include-file-name`, `--include include-file-name` the additional location to scan for the include-files besides
   the current working directory.
 
-- `-i {first, last}`, `--instr-position {first, last}` defines the position of the 4 instruction op-code bits within
-  the assembled machine code word. The value `first` indicates that the 4 most significant bits are used to encode the
-  MC14500B instruction op-code, and the value `last` indicates that the 4 least significant bits are used to encode
+- `-i {first, last}`, `--instr-position {first, last}` defines the position of the 4-bit instruction op-code within
+  the assembled machine code word. The value `first` indicates that the four most significant bits are used to encode the
+  MC14500B instruction op-code, and the value `last` indicates that the four least significant bits are used to encode
   the MC14500B instruction op-code. The default value is `last`.
 
 - `-n {0,F}`, `--non-programmed-location-value {0,F}` defines the value for the ROM memory locations that are not
@@ -189,7 +189,7 @@ containing the exact error messages written to `stderr`. The program exit value 
   `11`, `0xB`, `013`, `0o13`, `0b1011`, `#11`, `#$B`, `#013`, and `#%1011`.
 
 - `ORG number` sets the current value of a program counter to the _number_. An attempt to write twice to the same
-  program counter location results in an error. The rules representing the _number_ are the same as those defining
+  program-counter location results in an error. The rules representing the _number_ are the same as those defining
   the _value_ part of the `EQU` directive.
 
 - `LUT identifier number` defines an _identifier_ that, if encountered within one of the following instructions `NOPO`,
@@ -199,7 +199,7 @@ containing the exact error messages written to `stderr`. The program exit value 
 
 - `identifier:` an identifier followed by a column as the first word in an assembler file line defines a label.
   Labels are matched against the _identifiers_s defined by `LUT` directives, and the _identifier_ is associated with the
-  program counter value at the _label_ location.
+  program-counter value at the _label_ location.
 
 ### Lookup Table
 
@@ -213,10 +213,10 @@ The lookup table size is equal to the size of the io-address space. The location
 
 ### Include Functionality
 
-Assembler supports an implicit include functionality. It may be used to simulate simple macros.
+Assembler supports the include functionality implicitely. It may be used to simulate simple macros.
 
-Suppose a _word_ is encountered on the 1st position in the non-comment line that is not an MC14500B instruction nor an
-assembler pseudo instruction. The program will look for a file with the same name as the encountered _word_ (but in a
+Suppose a _word_ is encountered at the first position in the non-comment line that is not an MC14500B instruction nor an
+assembler pseudo instruction. The program will look for a file with the same name as the encountered _word_ (but in the
 lowercase) and the extension `.asm`, first in the current directory, then in the directory specified by the `-I` or
 `--include` command line argument. If such a file has been found, it is assembled, and the generated machine code is
 injected into the current location.
@@ -249,7 +249,7 @@ The following examples assume that they are executed from the [examples](example
   Map file:  1d-conways-gol/1d-conways-gol.map created
   Assembler succeeded
   ```
-  And produces the following 3 files:
+  And produces the following three files:
     - `1d-conways-gol/1d-conways-gol.lst` - the assembler listing file,
     - `1d-conways-gol/1d-conways-gol.mif` - the machine code in Memory Interchange Format,
     - `1d-conways-gol/1d-conways-gol.map` - the io-address usage mapping file.
@@ -334,7 +334,7 @@ The following examples assume that they are executed from the [examples](example
   Map file:  1d-conways-gol/1d-conways-gol.map created
   Assembler succeeded
   ```
-  Note the 7 output files are produced:
+  Note the seven output files are produced:
 
     - `1d-conways-gol/1d-conways-gol.lst` - the assembler listing file,
     - `1d-conways-gol/1d-conways-gol.mif` - the machine code in Memory Interchange Format,
@@ -390,9 +390,9 @@ If the output file already exists, the program will ask for confirmation before 
 
 - `-h`, `--help` show the program help information, and exit.
 
-- `-i {first, last}`, `--instr-position {first, last}` defines the position of the 4 instruction op-code bits within
-  the assembled machine code word. The value `first` indicates that the 4 most significant bits are used to encode the
-  MC14500B instruction op-code, and the value `last` indicates that the 4 least significant bits are used to encode
+- `-i {first, last}`, `--instr-position {first, last}` defines the position of the 4-bit instruction op-code within
+  the assembled machine code word. The value `first` indicates that the four most significant bits are used to encode the
+  MC14500B instruction op-code, and the value `last` indicates that the four least significant bits are used to encode
   the MC14500B instruction op-code. The default value is `last`.
 
 - `-o OUT`, `--out OUT` where OUT defines the output file name. The default is the input file name with appended `.dis`
